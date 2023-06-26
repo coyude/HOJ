@@ -947,6 +947,9 @@ export default {
         judgeCaseMode: "ergodic_without_error",
         userExtraFile: "",
         judgeExtraFile: "",
+        isFileIO: false,
+        ioReadFileName: null,
+        ioWriteFileName: null,
       },
       problemTags: [], //指定问题的标签列表
       problemLanguages: [], //指定问题的编程语言列表
@@ -1048,6 +1051,9 @@ export default {
         judgeCaseMode: "ergodic_without_error",
         userExtraFile: null,
         judgeExtraFile: null,
+        isFileIO: false,
+        ioReadFileName: null,
+        ioWriteFileName: null
       };
 
       this.contestID = contestID;
