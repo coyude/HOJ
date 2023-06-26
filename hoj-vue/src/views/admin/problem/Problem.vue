@@ -949,7 +949,7 @@ export default {
         judgeExtraFile: "",
         isFileIO: false,
         ioReadFileName: null,
-        ioWriteFileName: null,
+        ioWriteFileName: null
       },
       problemTags: [], //指定问题的标签列表
       problemLanguages: [], //指定问题的编程语言列表
