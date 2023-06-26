@@ -666,12 +666,13 @@ export default {
       });
     },
     getProblemUri(problemId) {
-      this.$router.push({
-        name: 'ProblemDetails',
+      let href = this.$router.resolve({
+        name: "ProblemDetails",
         params: {
           problemID: problemId,
         },
       });
+      window.open(href.href, "_blank");
     },
     getLevelColor(difficulty) {
       return utils.getLevelColor(difficulty);
