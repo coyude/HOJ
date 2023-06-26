@@ -159,18 +159,21 @@
         </el-tab-pane>
 
         <el-tab-pane
-          :name="groupID?'GroupTrainingProblemList':'TrainingProblemList'"
+          :name="groupID ? 'GroupTrainingProblemList' : 'TrainingProblemList'"
           lazy
           :disabled="trainingMenuDisabled"
         >
           <span slot="label"
             ><i class="fa fa-list" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Problem_List')
+              $t("m.Problem_List")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
             <router-view
-              v-if="route_name === 'TrainingProblemList' || route_name === 'GroupTrainingProblemList'"
+              v-if="
+                route_name === 'TrainingProblemList' ||
+                route_name === 'GroupTrainingProblemList'
+              "
             ></router-view>
           </transition>
         </el-tab-pane>
@@ -288,10 +291,9 @@ export default {
       training: (state) => state.training.training,
     }),
     ...mapGetters([
-      'trainingPasswordFormVisible',
-      'trainingMenuDisabled',
-      'isPrivateTraining',
-      'isAuthenticated',
+      "trainingPasswordFormVisible",
+      "trainingMenuDisabled",
+      "isAuthenticated",
     ]),
   },
   watch: {
