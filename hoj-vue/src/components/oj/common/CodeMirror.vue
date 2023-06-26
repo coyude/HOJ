@@ -52,6 +52,15 @@
               </el-button>
             </el-tooltip>
           </span>
+          <span>
+            <el-tooltip :content="$t('m.Beauty_Code')" placement="top">
+              <el-button
+                icon="el-icon-thumb"
+                @click="CodeBeauty"
+                size="small"
+              ></el-button>
+            </el-tooltip>
+          </span>
         </div>
       </el-col>
       <el-col
@@ -485,6 +494,9 @@
 import utils from "@/common/utils";
 import api from "@/common/api";
 import myMessage from "@/common/message";
+//js_beautify
+import { js_beautify, css_beautify, html_beautify } from "js-beautify";
+//codemirror
 import { codemirror, CodeMirror } from "vue-codemirror-lite";
 import { JUDGE_STATUS, JUDGE_STATUS_RESERVE } from "@/common/constants";
 
@@ -695,6 +707,9 @@ export default {
     })
   },
   methods: {
+    CodeBeauty() {
+      this.value = js_beautify(this.value || "");
+    },
     onEditorCodeChange(newCode) {
       this.$emit("update:value", newCode);
     },
