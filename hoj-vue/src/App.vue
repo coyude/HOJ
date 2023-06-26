@@ -11,13 +11,10 @@
       <footer v-if="showFooter" class="fix-to-bottom">
         <div class="mundb-footer">
           <el-row>
-            <el-col
-              :md="6"
-              :xs="24"
-            >
+            <el-col :md="6" :xs="24">
               <h1>{{ websiteConfig.name }}</h1>
               <span
-                style="line-height:25px"
+                style="line-height: 25px"
                 v-html="websiteConfig.description"
                 v-katex
                 v-highlight
@@ -27,22 +24,37 @@
             <el-col class="hr-none">
               <el-divider></el-divider>
             </el-col>
-            <el-col
-              :md="6"
-              :xs="24"
-            >
-              <h1>{{ $t('m.Service') }}</h1>
+            <el-col :md="6" :xs="24">
+              <h1>{{ $t("m.Service") }}</h1>
               <p>
-                <a @click="goRoute('/status')">{{ $t('m.Judging_Queue') }}</a>
+                <a @click="goRoute('/status')">{{ $t("m.Judging_Queue") }}</a>
               </p>
               <p>
-                <a @click="goRoute('/developer')">{{ $t('m.System_Info') }}</a>
+                <a @click="goRoute('/developer')">{{ $t("m.System_Info") }}</a>
               </p>
             </el-col>
             <el-col class="hr-none">
               <el-divider></el-divider>
             </el-col>
-            <el-col
+            <el-col :md="6" :xs="24">
+              <h1>{{ $t("m.Support") }}</h1>
+              <p>
+                <i class="fa fa-info-circle" aria-hidden="true"></i
+                ><a
+                  href="https://nyoj.online/discussion-detail/28"
+                  target="_blank"
+                >
+                  {{ $t("m.Help") }}</a
+                >
+              </p>
+              <p>
+                <i class="el-icon-document"></i>
+                <a @click="goRoute('/introduction')">
+                  {{ $t("m.NavBar_About") }}</a
+                >
+              </p>
+            </el-col>
+            <!-- <el-col
               :md="6"
               :xs="24"
             >
@@ -59,26 +71,7 @@
             </el-col>
             <el-col class="hr-none">
               <el-divider></el-divider>
-            </el-col>
-            <el-col
-              :md="6"
-              :xs="24"
-            >
-              <h1>{{ $t('m.Support') }}</h1>
-              <p>
-                <i
-                  class="fa fa-info-circle"
-                  aria-hidden="true"
-                ></i><a @click="goRoute('/introduction')"> {{ $t('m.NavBar_About') }}</a>
-              </p>
-              <p>
-                <i class="el-icon-document"></i>
-                <a
-                  href="https://docs.hdoi.cn"
-                  target="_blank"
-                > {{ $t('m.Help') }}</a>
-              </p>
-            </el-col>
+            </el-col> -->
           </el-row>
         </div>
         <div class="mundb-footer">
