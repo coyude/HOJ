@@ -928,7 +928,7 @@ export default {
         stackLimit: 128,
         difficulty: 0,
         auth: 1,
-        codeShare: true,
+        codeShare: false,
         examples: [], // 题面上的样例输入输出
         spjLanguage: "",
         spjCode: "",
@@ -939,17 +939,14 @@ export default {
         isUploadCase: true,
         type: 0,
         hint: "",
-        source: "",
+        source: "NYOJ",
         cid: null,
-        isRemoveEndBlank:false,
+        isRemoveEndBlank: true,
         openCaseResult: true,
         judgeMode: "default",
-        judgeCaseMode: "default",
+        judgeCaseMode: "ergodic_without_error",
         userExtraFile: "",
         judgeExtraFile: "",
-        isFileIO: false,
-        ioReadFileName: null,
-        ioWriteFileName: null
       },
       problemTags: [], //指定问题的标签列表
       problemLanguages: [], //指定问题的编程语言列表
@@ -1031,8 +1028,8 @@ export default {
         memoryLimit: 256,
         stackLimit: 128,
         difficulty: 0,
-        auth: 1,
-        codeShare: true,
+        auth: 3,
+        codeShare: false,
         examples: [],
         spjLanguage: "",
         spjCode: "",
@@ -1043,17 +1040,14 @@ export default {
         contestProblem: {},
         type: 0,
         hint: "",
-        source: "",
+        source: "NYOJ",
         cid: null,
-        isRemoveEndBlank:false,
+        isRemoveEndBlank: true,
         openCaseResult: true,
         judgeMode: "default",
-        judgeCaseMode: "default",
+        judgeCaseMode: "ergodic_without_error",
         userExtraFile: null,
         judgeExtraFile: null,
-        isFileIO: false,
-        ioReadFileName: null,
-        ioWriteFileName: null
       };
 
       this.contestID = contestID;
