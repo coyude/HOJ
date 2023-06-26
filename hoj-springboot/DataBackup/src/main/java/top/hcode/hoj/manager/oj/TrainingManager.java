@@ -397,11 +397,11 @@ public class TrainingManager {
     }
 
     /**
-     * 未启用，该操作会导致公开训练也记录，但其实并不需要，会造成数据量无效增加
+     * 启用，该操作会导致公开训练也记录
      */
-    @Async
     public void checkAndSyncTrainingRecord(Long pid, Long submitId, String uid) {
-        List<TrainingProblem> trainingProblemList = trainingProblemEntityService.getPrivateTrainingProblemListByPid(pid, uid);
+        List<TrainingProblem> trainingProblemList = trainingProblemEntityService.getPrivateTrainingProblemListByPid(pid,
+                uid);
         if (!CollectionUtils.isEmpty(trainingProblemList)) {
             List<TrainingRecord> trainingRecordList = new ArrayList<>();
             for (TrainingProblem trainingProblem : trainingProblemList) {
