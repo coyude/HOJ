@@ -204,7 +204,6 @@
               <el-option
                 :label="$t('m.Contest_Problem')"
                 :value="3"
-                :disabled="!query.contestId"
               ></el-option>
             </el-select>
           </template>

@@ -2,26 +2,34 @@
   <div>
     <div class="intr-center">
       <paper-card type="server">
-        <h1 class="text-darken">HOJ</h1>
-        <h1>
+        <h1 class="text-darken">NYOJ</h1>
+        <!-- <h1>
           <a href="https://gitee.com/himitzh0730/hoj" target="_blank"
             >Hcode Online Judge</a
           >
-        </h1>
+        </h1> -->
         <p>
-          {{ $t('m.Leader_BackEnd_FrontEnd_Engineer') }} / Himit_ZH
+          {{ $t("m.Leader_BackEnd_FrontEnd_Engineer") }} /Himit_ZH
           <a href="https://github.com/HimitZH" class="icon" target="_blank"
             ><i class="fa fa-github"></i>
           </a>
-        </p>
-        <p>
-          {{ $t('m.Group_Function_Development_Contributor') }} / 冷蕴
+          冷蕴
           <a href="https://github.com/IUaenaSong" class="icon" target="_blank"
             ><i class="fa fa-github"></i>
           </a>
         </p>
+        <p>
+          {{ $t("m.Group_Function_Development_Contributor") }} /Riba2534
+          <a href="https://github.com/riba2534" class="icon" target="_blank"
+            ><i class="fa fa-github"></i>
+          </a>
+          DYM_
+          <a href="https://github.com/IDYMI" class="icon" target="_blank"
+            ><i class="fa fa-github"></i>
+          </a>
+        </p>
         <p class="teal-text">
-          <i class="el-icon-circle-check"></i> {{ $t('m.Open_Source') }}
+          <i class="el-icon-circle-check"></i> {{ $t("m.Open_Source") }}
         </p>
       </paper-card>
     </div>

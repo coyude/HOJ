@@ -1,4 +1,4 @@
-# Hcode Online Judge（HOJ）
+# Hcode Online Judge（HOJ）~~NYOJ~~
 
 ![logo](./logo.png)
 
