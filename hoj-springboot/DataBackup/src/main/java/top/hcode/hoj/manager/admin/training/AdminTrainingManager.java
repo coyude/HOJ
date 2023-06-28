@@ -86,9 +86,9 @@ public class AdminTrainingManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        // 只有超级管理员和训练拥有者才能操作
+       // 是否为超级管理员或者题目管理
+       boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+       // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(training.getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
@@ -154,9 +154,9 @@ public class AdminTrainingManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        // 只有超级管理员和训练拥有者才能操作
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+        // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(trainingDto.getTraining().getAuthor())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
@@ -210,9 +210,9 @@ public class AdminTrainingManager {
     public void changeTrainingStatus(Long tid, String author, Boolean status) throws StatusForbiddenException, StatusFailException {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        // 只有超级管理员和训练拥有者才能操作
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+        // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUsername().equals(author)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }

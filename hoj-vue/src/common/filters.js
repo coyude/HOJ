@@ -11,8 +11,6 @@ function fromNow (time) {
 function parseRole(num){
   if(num==1000){
     return '超级管理员'
-  }else if(num==1001){
-    return '普通管理员'
   }else if(num==1002){
     return '用户(默认)'
   }else if(num==1003){

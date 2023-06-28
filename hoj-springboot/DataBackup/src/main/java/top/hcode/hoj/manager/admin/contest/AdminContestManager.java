@@ -75,10 +75,9 @@ public class AdminContestManager {
         // 获取当前登录的用户
         UserRolesVO userRolesVo = (UserRolesVO) SecurityUtils.getSubject().getSession().getAttribute("userInfo");
 
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-
-        // 只有超级管理员和比赛拥有者才能操作
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+        // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(contest.getUid())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
@@ -171,9 +170,9 @@ public class AdminContestManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        // 只有超级管理员和比赛拥有者才能操作
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+        // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(adminContestVo.getUid())) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }
@@ -210,9 +209,9 @@ public class AdminContestManager {
     public void changeContestVisible(Long cid, String uid, Boolean visible) throws StatusFailException, StatusForbiddenException {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        // 是否为超级管理员
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        // 只有超级管理员和比赛拥有者才能操作
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
+        // 只有超级管理员和题目管理和训练拥有者才能操作
         if (!isRoot && !userRolesVo.getUid().equals(uid)) {
             throw new StatusForbiddenException("对不起，你无权限操作！");
         }

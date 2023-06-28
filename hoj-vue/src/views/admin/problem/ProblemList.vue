@@ -233,7 +233,8 @@
               effect="dark"
               :content="$t('m.Download_Testcase')"
               placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
+              v-if="isSuperAdmin || isProblemAdmin||
+                  row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-download"
@@ -263,7 +264,8 @@
               effect="dark"
               :content="$t('m.Delete')"
               placement="top"
-              v-if="isSuperAdmin || isProblemAdmin"
+              v-if="isSuperAdmin || isProblemAdmin||
+                  row.author == userInfo.username"
             >
               <el-button
                 icon="el-icon-delete-solid"

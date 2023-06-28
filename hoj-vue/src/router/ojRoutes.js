@@ -3,6 +3,7 @@ import SetNewPassword from "@/views/oj/user/SetNewPassword.vue"
 import UserHome from "@/views/oj/user/UserHome.vue"
 import Setting from "@/views/oj/user/Setting.vue"
 import ProblemLIst from "@/views/oj/problem/ProblemList.vue"
+import Announcement from "@/views/oj/about/Home_Announcement.vue"
 import Logout from "@/views/oj/user/Logout.vue"
 import SubmissionList from "@/views/oj/status/SubmissionList.vue"
 import SubmissionDetails from "@/views/oj/status/SubmissionDetails.vue"
@@ -63,6 +64,12 @@ const ojRoutes = [
     name: 'ProblemList',
     component: ProblemLIst,
     meta: { title: 'Problem' }
+  },
+  {
+    path: '/announcement',
+    name: 'Announcement',
+    component: Announcement,
+    meta: { title: 'Announcement' }
   },
   {
     path: '/problem/:problemID',

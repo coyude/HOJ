@@ -1,17 +1,12 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col
-        :md="15"
-        :sm="24"
-      >
+      <el-col :md="15" :sm="24">
         <el-card>
-          <div
-            slot="header"
-            class="content-center"
-          >
-            <span class="panel-title home-title welcome-title">{{ $t('m.Welcome_to')
-              }}{{ websiteConfig.shortName }}</span>
+          <div slot="header" class="content-center">
+            <span class="panel-title home-title welcome-title"
+              >{{ $t("m.Welcome_to") }}{{ websiteConfig.shortName }}</span
+            >
           </div>
           <el-carousel
             :interval="interval"
@@ -24,31 +19,21 @@
               v-for="(item, index) in carouselImgList"
               :key="index"
             >
-              <el-image
-                :src="item.url"
-                fit="fill"
-              >
-                <div
-                  slot="error"
-                  class="image-slot"
-                >
+              <el-image :src="item.url" fit="fill">
+                <div slot="error" class="image-slot">
                   <i class="el-icon-picture-outline"></i>
                 </div>
               </el-image>
             </el-carousel-item>
           </el-carousel>
         </el-card>
-        <Announcements class="card-top"></Announcements>
         <SubmissionStatistic class="card-top"></SubmissionStatistic>
         <el-card class="card-top">
-          <div
-            slot="header"
-            class="clearfix"
-          >
+          <div slot="header" class="clearfix">
             <span class="panel-title home-title">
-              <i class="el-icon-magic-stick"></i> {{
-              $t('m.Latest_Problem')
-            }}</span>
+              <i class="el-icon-magic-stick"></i>
+              {{ $t("m.Latest_Problem") }}</span
+            >
           </div>
           <vxe-table
             border="inner"
@@ -91,28 +76,20 @@
                 </el-tooltip>
               </template>
             </vxe-table-column>
-
           </vxe-table>
         </el-card>
       </el-col>
-      <el-col
-        :md="9"
-        :sm="24"
-        class="phone-margin"
-      >
+      <el-col :md="9" :sm="24" class="phone-margin">
         <template v-if="contests.length">
           <el-card>
-            <div
-              slot="header"
-              class="clearfix title content-center"
-            >
+            <div slot="header" class="clearfix title content-center">
               <div class="home-title home-contest">
-                <i class="el-icon-trophy"></i> {{ $t('m.Recent_Contest') }}
+                <i class="el-icon-trophy"></i> {{ $t("m.Recent_Contest") }}
               </div>
             </div>
             <el-card
               shadow="hover"
-              v-for="(contest, index) in contests"
+              v-for="(contest, index) in contests.slice(0, 5)"
               :key="index"
               class="contest-card"
               :class="
@@ -121,14 +98,8 @@
                   : 'contest-card-schedule'
               "
             >
-              <div
-                slot="header"
-                class="clearfix contest-header"
-              >
-                <a
-                  class="contest-title"
-                  @click="goContest(contest.id)"
-                >{{
+              <div slot="header" class="clearfix contest-header">
+                <a class="contest-title" @click="goContest(contest.id)">{{
                   contest.title
                 }}</a>
                 <div class="contest-status">
@@ -137,12 +108,9 @@
                     size="medium"
                     :color="CONTEST_STATUS_REVERSE[contest.status]['color']"
                   >
-                    <i
-                      class="fa fa-circle"
-                      aria-hidden="true"
-                    ></i>
+                    <i class="fa fa-circle" aria-hidden="true"></i>
                     {{
-                      $t('m.' + CONTEST_STATUS_REVERSE[contest.status]['name'])
+                      $t("m." + CONTEST_STATUS_REVERSE[contest.status]["name"])
                     }}
                   </el-tag>
                 </div>
@@ -154,8 +122,8 @@
                     round
                     @click="goContestList(contest.type)"
                     size="mini"
-                    style="margin-right: 10px;"
-                  ><i class="fa fa-trophy"></i>
+                    style="margin-right: 10px"
+                    ><i class="fa fa-trophy"></i>
                     {{ contest.type | parseContestType }}
                   </el-button>
                 </template>
@@ -163,14 +131,14 @@
                   <el-tooltip
                     :content="
                       $t('m.Contest_Rank') +
-                        '：' +
-                        (contest.oiRankScoreType == 'Recent'
-                          ? $t(
-                              'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
-                            )
-                          : $t(
-                              'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
-                            ))
+                      '：' +
+                      (contest.oiRankScoreType == 'Recent'
+                        ? $t(
+                            'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
+                          )
+                        : $t(
+                            'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
+                          ))
                     "
                     placement="top"
                   >
@@ -179,8 +147,8 @@
                       round
                       @click="goContestList(contest.type)"
                       size="mini"
-                      style="margin-right: 10px;"
-                    ><i class="fa fa-trophy"></i>
+                      style="margin-right: 10px"
+                      ><i class="fa fa-trophy"></i>
                       {{ contest.type | parseContestType }}
                     </el-button>
                   </el-tooltip>
@@ -195,7 +163,7 @@
                     size="medium"
                     effect="plain"
                   >
-                    {{ $t('m.' + CONTEST_TYPE_REVERSE[contest.auth]['name']) }}
+                    {{ $t("m." + CONTEST_TYPE_REVERSE[contest.auth]["name"]) }}
                   </el-tag>
                 </el-tooltip>
               </div>
@@ -205,10 +173,10 @@
                     type="primary"
                     round
                     size="mini"
-                    style="margin-top: 4px;"
-                  ><i class="fa fa-calendar"></i>
+                    style="margin-top: 4px"
+                    ><i class="fa fa-calendar"></i>
                     {{
-                      contest.startTime | localtime((format = 'MM-DD HH:mm'))
+                      contest.startTime | localtime((format = "MM-DD HH:mm"))
                     }}
                   </el-button>
                 </li>
@@ -217,8 +185,8 @@
                     type="success"
                     round
                     size="mini"
-                    style="margin-top: 4px;"
-                  ><i class="fa fa-clock-o"></i>
+                    style="margin-top: 4px"
+                    ><i class="fa fa-clock-o"></i>
                     {{ getDuration(contest.startTime, contest.endTime) }}
                   </el-button>
                 </li>
@@ -231,8 +199,9 @@
                   >
                     <i
                       class="el-icon-user-solid"
-                      style="color:rgb(48, 145, 242);"
-                    ></i>x{{ contest.count }}
+                      style="color: rgb(48, 145, 242)"
+                    ></i
+                    >x{{ contest.count }}
                   </el-button>
                 </li>
               </ul>
@@ -240,12 +209,9 @@
           </el-card>
         </template>
         <el-card :class="contests.length ? 'card-top' : ''">
-          <div
-            slot="header"
-            class="clearfix"
-          >
+          <div slot="header" class="clearfix">
             <span class="panel-title home-title">
-              <i class="el-icon-s-data"></i> {{ $t('m.Recent_7_Days_AC_Rank')}}
+              <i class="el-icon-s-data"></i> {{ $t("m.Recent_7_Days_AC_Rank") }}
             </span>
           </div>
           <vxe-table
@@ -257,12 +223,10 @@
             max-height="500px"
             :loading="loading.recent7ACRankLoading"
           >
-            <vxe-table-column
-              type="seq"
-              min-width="50"
-            >
+            <vxe-table-column type="seq" min-width="50">
               <template v-slot="{ rowIndex }">
-                <span :class="getRankTagClass(rowIndex)">{{ rowIndex + 1 }}
+                <span :class="getRankTagClass(rowIndex)"
+                  >{{ rowIndex + 1 }}
                 </span>
                 <span :class="'cite no' + rowIndex"></span>
               </template>
@@ -284,17 +248,11 @@
                 ></avatar>
                 <a
                   @click="goUserHome(row.username, row.uid)"
-                  style="color:#2d8cf0;"
-                >{{ row.username }}</a>
-                <span
-                  style="margin-left:2px"
-                  v-if="row.titleName"
+                  style="color: #2d8cf0"
+                  >{{ row.username }}</a
                 >
-                  <el-tag
-                    effect="dark"
-                    size="small"
-                    :color="row.titleColor"
-                  >
+                <span style="margin-left: 2px" v-if="row.titleName">
+                  <el-tag effect="dark" size="small" :color="row.titleColor">
                     {{ row.titleName }}
                   </el-tag>
                 </span>
@@ -310,12 +268,10 @@
           </vxe-table>
         </el-card>
         <el-card class="card-top">
-          <div
-            slot="header"
-            class="clearfix title"
-          >
+          <div slot="header" class="clearfix title">
             <span class="home-title panel-title">
-              <i class="el-icon-monitor"></i> {{ $t('m.Supported_Remote_Online_Judge') }}
+              <i class="el-icon-monitor"></i>
+              {{ $t("m.Supported_Remote_Online_Judge") }}
             </span>
           </div>
           <el-row :gutter="20">
@@ -325,14 +281,8 @@
               v-for="(oj, index) in remoteJudgeList"
               :key="index"
             >
-              <a
-                :href="oj.url"
-                target="_blank"
-              >
-                <el-tooltip
-                  :content="oj.name"
-                  placement="top"
-                >
+              <a :href="oj.url" target="_blank">
+                <el-tooltip :content="oj.name" placement="top">
                   <el-image
                     :src="oj.logo"
                     fit="fill"
@@ -341,10 +291,7 @@
                       oj.status ? 'oj-normal ' + oj.name : 'oj-error ' + oj.name
                     "
                   >
-                    <div
-                      slot="error"
-                      class="image-slot"
-                    >
+                    <div slot="error" class="image-slot">
                       <i class="el-icon-picture-outline"></i>
                     </div>
                   </el-image>
@@ -368,13 +315,11 @@ import {
 import { mapState, mapGetters } from "vuex";
 import Avatar from "vue-avatar";
 import myMessage from "@/common/message";
-const Announcements = () => import("@/components/oj/common/Announcements.vue");
 const SubmissionStatistic = () =>
   import("@/components/oj/home/SubmissionStatistic.vue");
 export default {
   name: "home",
   components: {
-    Announcements,
     SubmissionStatistic,
     Avatar,
   },

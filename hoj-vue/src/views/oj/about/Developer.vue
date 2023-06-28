@@ -27,6 +27,10 @@
           <a href="https://github.com/IDYMI" class="icon" target="_blank"
             ><i class="fa fa-github"></i>
           </a>
+          Coyude
+          <a href="https://github.com/coyude" class="icon" target="_blank"
+            ><i class="fa fa-github"></i>
+          </a>
         </p>
         <p class="teal-text">
           <i class="el-icon-circle-check"></i> {{ $t("m.Open_Source") }}

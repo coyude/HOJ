@@ -79,7 +79,8 @@ public class GroupProblemManager {
     public IPage<ProblemVO> getProblemList(Integer limit, Integer currentPage, Long gid) throws StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Group group = groupEntityService.getById(gid);
 
@@ -101,7 +102,8 @@ public class GroupProblemManager {
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Group group = groupEntityService.getById(gid);
 
@@ -122,7 +124,8 @@ public class GroupProblemManager {
     public Problem getProblem(Long pid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Problem problem = problemEntityService.getById(pid);
 
@@ -154,7 +157,8 @@ public class GroupProblemManager {
         problemValidator.validateGroupProblem(problemDto.getProblem());
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Long gid = problemDto.getProblem().getGid();
 
@@ -211,7 +215,8 @@ public class GroupProblemManager {
         problemValidator.validateGroupProblemUpdate(problemDto.getProblem());
 
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Long pid = problemDto.getProblem().getId();
 
@@ -288,7 +293,8 @@ public class GroupProblemManager {
     public void deleteProblem(Long pid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Problem problem = problemEntityService.getById(pid);
 
@@ -325,7 +331,8 @@ public class GroupProblemManager {
     public List<ProblemCase> getProblemCases(Long pid, Boolean isUpload) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Problem problem = problemEntityService.getById(pid);
 
@@ -361,7 +368,8 @@ public class GroupProblemManager {
     public List<Tag> getAllProblemTagsList(Long gid) throws StatusNotFoundException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Group group = groupEntityService.getById(gid);
 
@@ -384,7 +392,8 @@ public class GroupProblemManager {
     public void compileSpj(CompileDTO compileDTO, Long gid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Group group = groupEntityService.getById(gid);
 
@@ -408,7 +417,8 @@ public class GroupProblemManager {
     public void compileInteractive(CompileDTO compileDTO, Long gid) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Group group = groupEntityService.getById(gid);
 
@@ -432,7 +442,8 @@ public class GroupProblemManager {
     public void changeProblemAuth(Long pid, Integer auth) throws StatusForbiddenException, StatusNotFoundException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Problem problem = problemEntityService.getById(pid);
 
@@ -471,7 +482,8 @@ public class GroupProblemManager {
     public void applyPublic(Long pid, Boolean isApplied) throws StatusNotFoundException, StatusForbiddenException, StatusFailException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
 
         Problem problem = problemEntityService.getById(pid);
 

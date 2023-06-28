@@ -124,7 +124,8 @@ public class ImageManager {
     public Group uploadGroupAvatar(MultipartFile image, Long gid) throws StatusFailException, StatusSystemErrorException, StatusForbiddenException {
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root") || SecurityUtils.getSubject().hasRole("problem_admin");
         if (!isRoot && !groupValidator.isGroupRoot(userRolesVo.getUid(), gid)) {
             throw new StatusForbiddenException("对不起，您无权限操作！");
         }

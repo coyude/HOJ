@@ -67,7 +67,7 @@ public class AdminContestController {
 
     @DeleteMapping("")
     @RequiresAuthentication
-    @RequiresRoles(value = "root") // 只有超级管理员能删除比赛
+    @RequiresRoles(value = {"root", "problem_admin"}, logical = Logical.OR)
     public CommonResult<Void> deleteContest(@RequestParam("cid") Long cid) {
 
         return adminContestService.deleteContest(cid);

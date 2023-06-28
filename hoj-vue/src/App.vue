@@ -41,7 +41,7 @@
               <p>
                 <i class="fa fa-info-circle" aria-hidden="true"></i
                 ><a
-                  href="https://nyoj.online/discussion-detail/28"
+                  href="/discussion-detail/28"
                   target="_blank"
                 >
                   {{ $t("m.Help") }}</a
@@ -370,7 +370,7 @@ a:hover {
   margin: 10px 0;
 }
 .contest-rank-config{
-  text-align:right; 
+  text-align:right;
   margin-top: 15px;
 }
 .contest-scoreBoard-config{
@@ -384,7 +384,7 @@ a:hover {
 }
 @media screen and (max-width: 992px) {
   .contest-rank-config{
-    text-align:center; 
+    text-align:center;
     margin-bottom: 10px;
     margin-top: -1px;
   }

@@ -14,7 +14,7 @@
           >
         </h1>
         <div class="title-msg">
-          <span>
+          <span>  
             <a
               class="c999"
               @click="getInfoByUsername(discussion.uid, discussion.author)"
@@ -109,8 +109,8 @@
         </div>
       </div>
       <div class="body-article">
-        <Markdown 
-          :isAvoidXss="discussion.role != 'root'&&discussion.role != 'admin'" 
+        <Markdown
+          :isAvoidXss="discussion.role != 'root'&&discussion.role != 'admin'"
           :content="discussion.content">
         </Markdown>
       </div>
