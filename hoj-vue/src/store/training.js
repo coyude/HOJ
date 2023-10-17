@@ -18,7 +18,7 @@ const state = {
 const getters = {
   isTrainingAdmin: (state, getters, _, rootGetters) => {
     return rootGetters.isAuthenticated &&
-      (state.training.author === rootGetters.userInfo.username || rootGetters.isSuperAdmin || state.groupTrainingAuth == 5)
+      (state.training.author === rootGetters.userInfo.username || rootGetters.isSuperAdmin || rootGetters.isNormalAdmin || state.groupTrainingAuth == 5)
   },
   trainingMenuDisabled: (state, getters) => {
     // 训练创建者和超级管理员可以直接查看
@@ -35,7 +35,7 @@ const getters = {
   // 是否需要显示密码验证框
   trainingPasswordFormVisible: (state, getters) => {
     // 如果是公开训练，或已注册过，管理员都不用再显示
-    return !state.intoAccess && state.training.auth != TRAINING_TYPE.Public.name && !getters.isTrainingAdmin 
+    return !state.intoAccess && state.training.auth != TRAINING_TYPE.Public.name && !getters.isTrainingAdmin
   }
 }
 

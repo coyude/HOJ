@@ -1,54 +1,132 @@
 <template>
   <div>
     <el-row :gutter="20">
-      <el-col
-        :md="15"
-        :sm="24"
-      >
+      <el-col :md="15" :sm="24">
         <el-card>
-          <div
-            slot="header"
-            class="content-center"
-          >
-            <span class="panel-title home-title welcome-title">{{ $t('m.Welcome_to')
-              }}{{ websiteConfig.shortName }}</span>
+          <div slot="header" class="content-center">
+            <span class="panel-title home-title welcome-title"
+              >{{ $t("m.Welcome_to") }}{{ websiteConfig.shortName }}</span
+            >
           </div>
+
           <el-carousel
             :interval="interval"
             :height="srcHight"
             class="img-carousel"
+            ref="carousel"
+            align="center"
+            style="background-color: #fff"
+          >
+            <el-carousel-item v-for="item in carouselImgList" :key="item.url">
+              <!-- <el-image
+                :title="newsize"
+                :src="item.url"
+                class="image"
+              ></el-image> -->
+
+              <div v-if="item.hint">
+                <el-tooltip
+                  content="Bottom Center 提示文字"
+                  placement="bottom"
+                  effect="light"
+                >
+                  <div
+                    slot="content"
+                    style="
+                      text-align: center;
+                      min-width: 180px;
+                      font-size: 15px;
+                    "
+                  >
+                    {{ item.hint }}
+                  </div>
+                  <el-image
+                    fit="contain"
+                    :src="item.url"
+                    :alt="item.url"
+                    :style="{
+                      cursor: isActive(item) && item.link ? 'pointer' : 'auto',
+                    }"
+                    @click="linkTo"
+                    class="normal-image"
+                  ></el-image>
+                </el-tooltip>
+              </div>
+              <div v-else>
+                <el-image
+                  fit="contain"
+                  :src="item.url"
+                  :alt="item.url"
+                  :style="{
+                    cursor: isActive(item) && item.link ? 'pointer' : 'auto',
+                  }"
+                  @click="linkTo"
+                  class="normal-image"
+                ></el-image>
+              </div>
+
+              <!-- <div slot="default" class="text">{{ item.hint }}</div> -->
+
+              <!-- <el-popover
+                v-if="item.link"
+                placement="right"
+                :title="item.hint"
+                trigger="hover"
+                :style="{
+                  cursor: isActive(item) && item.link ? 'pointer' : 'auto',
+                }"
+                @click.native="linkTo"
+              >
+                <el-image
+                  slot="reference"
+                  :src="item.url"
+                  :alt="item.url"
+                  class="image"
+                  fit="contain"
+                ></el-image>
+                <el-image
+                  :src="item.url"
+                  class="preview-image"
+                  fit="contain"
+                ></el-image>
+              </el-popover>
+              <el-image
+                v-else
+                fit="contain"
+                :src="item.url"
+                :alt="item.url"
+                :style="{
+                  cursor: isActive(item) && item.link ? 'pointer' : 'auto',
+                }"
+                @click="linkTo"
+                class="normal-image"
+              ></el-image> -->
+            </el-carousel-item>
+          </el-carousel>
+          <!-- <el-carousel
+            :interval="interval"
+            :height="srcHight"
+            @click.native="linkTo"
+            class="img-carousel"
             arrow="always"
             indicator-position="outside"
           >
-            <el-carousel-item
-              v-for="(item, index) in carouselImgList"
-              :key="index"
-            >
-              <el-image
-                :src="item.url"
-                fit="fill"
-              >
-                <div
-                  slot="error"
-                  class="image-slot"
-                >
+            <el-carousel-item v-for="item in carouselImgList" :key="item.url">
+              <el-image :src="item.url" fit="fill">
+                <div slot="error" class="image-slot">
                   <i class="el-icon-picture-outline"></i>
                 </div>
               </el-image>
             </el-carousel-item>
-          </el-carousel>
+          </el-carousel> -->
         </el-card>
-        <Announcements class="card-top"></Announcements>
         <SubmissionStatistic class="card-top"></SubmissionStatistic>
         <el-card class="card-top">
-          <div
-            slot="header"
-            class="clearfix"
-          >
+          <div slot="header" class="clearfix">
             <span class="panel-title home-title">
-              <i class="el-icon-magic-stick"></i> {{
-              $t('m.Latest_Problem')
-            }}</span>
+              <i class="el-icon-magic-stick"></i>
+              {{ $t("m.Latest_Problem") }}</span
+            >
           </div>
           <vxe-table
             border="inner"
@@ -91,28 +169,20 @@
                 </el-tooltip>
               </template>
             </vxe-table-column>
-
           </vxe-table>
         </el-card>
       </el-col>
-      <el-col
-        :md="9"
-        :sm="24"
-        class="phone-margin"
-      >
+      <el-col :md="9" :sm="24" class="phone-margin">
         <template v-if="contests.length">
           <el-card>
-            <div
-              slot="header"
-              class="clearfix title content-center"
-            >
+            <div slot="header" class="clearfix title content-center">
               <div class="home-title home-contest">
-                <i class="el-icon-trophy"></i> {{ $t('m.Recent_Contest') }}
+                <i class="el-icon-trophy"></i> {{ $t("m.Recent_Contest") }}
               </div>
             </div>
             <el-card
               shadow="hover"
-              v-for="(contest, index) in contests"
+              v-for="(contest, index) in contests.slice(0, 5)"
               :key="index"
               class="contest-card"
               :class="
@@ -121,14 +191,8 @@
                   : 'contest-card-schedule'
               "
             >
-              <div
-                slot="header"
-                class="clearfix contest-header"
-              >
-                <a
-                  class="contest-title"
-                  @click="goContest(contest.id)"
-                >{{
+              <div slot="header" class="clearfix contest-header">
+                <a class="contest-title" @click="goContest(contest.id)">{{
                   contest.title
                 }}</a>
                 <div class="contest-status">
@@ -137,12 +201,9 @@
                     size="medium"
                     :color="CONTEST_STATUS_REVERSE[contest.status]['color']"
                   >
-                    <i
-                      class="fa fa-circle"
-                      aria-hidden="true"
-                    ></i>
+                    <i class="fa fa-circle" aria-hidden="true"></i>
                     {{
-                      $t('m.' + CONTEST_STATUS_REVERSE[contest.status]['name'])
+                      $t("m." + CONTEST_STATUS_REVERSE[contest.status]["name"])
                     }}
                   </el-tag>
                 </div>
@@ -154,8 +215,8 @@
                     round
                     @click="goContestList(contest.type)"
                     size="mini"
-                    style="margin-right: 10px;"
-                  ><i class="fa fa-trophy"></i>
+                    style="margin-right: 10px"
+                    ><i class="fa fa-trophy"></i>
                     {{ contest.type | parseContestType }}
                   </el-button>
                 </template>
@@ -163,14 +224,14 @@
                   <el-tooltip
                     :content="
                       $t('m.Contest_Rank') +
-                        '：' +
-                        (contest.oiRankScoreType == 'Recent'
-                          ? $t(
-                              'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
-                            )
-                          : $t(
-                              'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
-                            ))
+                      '：' +
+                      (contest.oiRankScoreType == 'Recent'
+                        ? $t(
+                            'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
+                          )
+                        : $t(
+                            'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
+                          ))
                     "
                     placement="top"
                   >
@@ -179,8 +240,8 @@
                       round
                       @click="goContestList(contest.type)"
                       size="mini"
-                      style="margin-right: 10px;"
-                    ><i class="fa fa-trophy"></i>
+                      style="margin-right: 10px"
+                      ><i class="fa fa-trophy"></i>
                       {{ contest.type | parseContestType }}
                     </el-button>
                   </el-tooltip>
@@ -195,7 +256,7 @@
                     size="medium"
                     effect="plain"
                   >
-                    {{ $t('m.' + CONTEST_TYPE_REVERSE[contest.auth]['name']) }}
+                    {{ $t("m." + CONTEST_TYPE_REVERSE[contest.auth]["name"]) }}
                   </el-tag>
                 </el-tooltip>
               </div>
@@ -205,10 +266,10 @@
                     type="primary"
                     round
                     size="mini"
-                    style="margin-top: 4px;"
-                  ><i class="fa fa-calendar"></i>
+                    style="margin-top: 4px"
+                    ><i class="fa fa-calendar"></i>
                     {{
-                      contest.startTime | localtime((format = 'MM-DD HH:mm'))
+                      contest.startTime | localtime((format = "MM-DD HH:mm"))
                     }}
                   </el-button>
                 </li>
@@ -217,8 +278,8 @@
                     type="success"
                     round
                     size="mini"
-                    style="margin-top: 4px;"
-                  ><i class="fa fa-clock-o"></i>
+                    style="margin-top: 4px"
+                    ><i class="fa fa-clock-o"></i>
                     {{ getDuration(contest.startTime, contest.endTime) }}
                   </el-button>
                 </li>
@@ -231,8 +292,9 @@
                   >
                     <i
                       class="el-icon-user-solid"
-                      style="color:rgb(48, 145, 242);"
-                    ></i>x{{ contest.count }}
+                      style="color: rgb(48, 145, 242)"
+                    ></i
+                    >x{{ contest.count }}
                   </el-button>
                 </li>
               </ul>
@@ -240,12 +302,9 @@
           </el-card>
         </template>
         <el-card :class="contests.length ? 'card-top' : ''">
-          <div
-            slot="header"
-            class="clearfix"
-          >
+          <div slot="header" class="clearfix">
             <span class="panel-title home-title">
-              <i class="el-icon-s-data"></i> {{ $t('m.Recent_7_Days_AC_Rank')}}
+              <i class="el-icon-s-data"></i> {{ $t("m.Recent_7_Days_AC_Rank") }}
             </span>
           </div>
           <vxe-table
@@ -257,12 +316,10 @@
             max-height="500px"
             :loading="loading.recent7ACRankLoading"
           >
-            <vxe-table-column
-              type="seq"
-              min-width="50"
-            >
+            <vxe-table-column type="seq" min-width="50">
               <template v-slot="{ rowIndex }">
-                <span :class="getRankTagClass(rowIndex)">{{ rowIndex + 1 }}
+                <span :class="getRankTagClass(rowIndex)"
+                  >{{ rowIndex + 1 }}
                 </span>
                 <span :class="'cite no' + rowIndex"></span>
               </template>
@@ -284,17 +341,11 @@
                 ></avatar>
                 <a
                   @click="goUserHome(row.username, row.uid)"
-                  style="color:#2d8cf0;"
-                >{{ row.username }}</a>
-                <span
-                  style="margin-left:2px"
-                  v-if="row.titleName"
+                  style="color: #2d8cf0"
+                  >{{ row.username }}</a
                 >
-                  <el-tag
-                    effect="dark"
-                    size="small"
-                    :color="row.titleColor"
-                  >
+                <span style="margin-left: 2px" v-if="row.titleName">
+                  <el-tag effect="dark" size="small" :color="row.titleColor">
                     {{ row.titleName }}
                   </el-tag>
                 </span>
@@ -310,12 +361,10 @@
           </vxe-table>
         </el-card>
         <el-card class="card-top">
-          <div
-            slot="header"
-            class="clearfix title"
-          >
+          <div slot="header" class="clearfix title">
             <span class="home-title panel-title">
-              <i class="el-icon-monitor"></i> {{ $t('m.Supported_Remote_Online_Judge') }}
+              <i class="el-icon-monitor"></i>
+              {{ $t("m.Supported_Remote_Online_Judge") }}
             </span>
           </div>
           <el-row :gutter="20">
@@ -325,14 +374,8 @@
               v-for="(oj, index) in remoteJudgeList"
               :key="index"
             >
-              <a
-                :href="oj.url"
-                target="_blank"
-              >
-                <el-tooltip
-                  :content="oj.name"
-                  placement="top"
-                >
+              <a :href="oj.url" target="_blank">
+                <el-tooltip :content="oj.name" placement="top">
                   <el-image
                     :src="oj.logo"
                     fit="fill"
@@ -341,10 +384,7 @@
                       oj.status ? 'oj-normal ' + oj.name : 'oj-error ' + oj.name
                     "
                   >
-                    <div
-                      slot="error"
-                      class="image-slot"
-                    >
+                    <div slot="error" class="image-slot">
                       <i class="el-icon-picture-outline"></i>
                     </div>
                   </el-image>
@@ -368,19 +408,17 @@ import {
 import { mapState, mapGetters } from "vuex";
 import Avatar from "vue-avatar";
 import myMessage from "@/common/message";
-const Announcements = () => import("@/components/oj/common/Announcements.vue");
 const SubmissionStatistic = () =>
   import("@/components/oj/home/SubmissionStatistic.vue");
 export default {
   name: "home",
   components: {
-    Announcements,
     SubmissionStatistic,
     Avatar,
   },
   data() {
     return {
-      interval: 5000,
+      interval: 2000,
       recentUpdatedProblems: [],
       recentUserACRecord: [],
       CONTEST_STATUS_REVERSE: {},
@@ -391,15 +429,30 @@ export default {
         recentUpdatedProblemsLoading: false,
         recentContests: false,
       },
+      newsize: "fasdfasdfasdf",
       carouselImgList: [
         {
           url: "https://s1.ax1x.com/2022/05/15/ORSjyT.jpg",
+          // link: "",
+          // hint: "",
         },
         {
           url: "https://s1.ax1x.com/2022/05/15/ORp86f.jpg",
+          link: "/developer",
+          hint: "系统信息",
         },
+        // {
+        //   url: require("@/assets/招新.jpg"),
+        //   link: "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=mSpJ4rr0ZIrn308IpPi8fszXKLr53_Oc&authKey=wi4nYdURUgOncLPzZtJDxb6oWXU5rTebZYCAXFlU40bz%2BUruk76ZRLnvAXd7MSY2&noverify=0&group_code=762817640",
+        //   hint: "南阳理工ACM招新群,点击跳转了解更多详情",
+        // },
+        // {
+        //   url: require("@/assets/海报.png"),
+        //   // link: "",
+        //   // hint: "",
+        // },
       ],
-      srcHight: "440px",
+      srcHight: "340px",
       remoteJudgeList: [
         {
           url: "http://acm.hdu.edu.cn",
@@ -445,7 +498,7 @@ export default {
     if (screenWidth < 768) {
       this.srcHight = "200px";
     } else {
-      this.srcHight = "440px";
+      this.srcHight = "340px";
     }
     this.CONTEST_STATUS_REVERSE = Object.assign({}, CONTEST_STATUS_REVERSE);
     this.CONTEST_TYPE_REVERSE = Object.assign({}, CONTEST_TYPE_REVERSE);
@@ -455,6 +508,32 @@ export default {
     this.getRecentUpdatedProblemList();
   },
   methods: {
+    // handleImageLoad(event) {
+    //   const image = event.target; // 获取图片对象
+    //   this.newsize = image;
+    //   const { width, height } = getResizedSize(image, 400, srcHight); // 计算图片缩放后的大小
+    //   this.newsize = width + height;
+    //   // console.log(`缩放后的宽度为${width}px，高度为${height}px`);
+    //   // 在这里可以设置图片的宽度和高度，例如：
+    //   // image.width = width;
+    //   // image.height = height;
+    // },
+    linkTo() {
+      const activeIndex = this.$refs.carousel.activeIndex;
+      if (activeIndex !== undefined && this.carouselImgList[activeIndex].link) {
+        window.open(this.carouselImgList[activeIndex].link, "_blank");
+      }
+    },
+
+    isActive(item) {
+      const activeIndex =
+        this.$refs.carousel && this.$refs.carousel.activeIndex;
+      return (
+        activeIndex !== undefined &&
+        item.url === this.carouselImgList[activeIndex].url
+      );
+    },
+
     getHomeCarousel() {
       api.getHomeCarousel().then((res) => {
         if (res.data.data != null && res.data.data.length > 0) {
@@ -554,6 +633,17 @@ export default {
 }
 </style>
 <style scoped>
+.preview-image,
+.normal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 图片等比缩放以填充整个容器 */
+  object-position: center; /* 图片在容器中的位置，这里设置为居中 */
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 /deep/.el-card__header {
   padding: 0.6rem 1.25rem !important;
 }
@@ -579,14 +669,6 @@ export default {
 }
 .oj-error {
   border-color: #e65c47;
-}
-
-.el-carousel__item h3 {
-  color: #475669;
-  font-size: 14px;
-  opacity: 0.75;
-  line-height: 200px;
-  margin: 0;
 }
 
 .contest-card {
@@ -652,7 +734,7 @@ li {
   float: right;
 }
 .img-carousel {
-  height: 490px;
+  height: 390px;
 }
 
 @media screen and (max-width: 768px) {

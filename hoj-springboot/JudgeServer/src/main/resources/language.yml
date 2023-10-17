@@ -169,7 +169,7 @@ run:
 ---
 language: PyPy3
 src_path: main.py
-exe_path: __pycache__/main.pypy39.pyc
+exe_path: __pycache__/main.pypy38.pyc
 compile:
   env: python3
   command: /usr/bin/pypy3 -m py_compile /w/{src_path}
@@ -232,28 +232,6 @@ exe_path: main.js
 run:
   env: default
   command: /usr/bin/jsv8/d8 /w/{exe_path}
-
----
-language: Ruby
-src_path: main.rb
-exe_path: main.rb
-run:
-  env: default
-  command: /usr/bin/ruby /w/{exe_path}
-
----
-language: Rust
-src_path: Main.cs
-exe_path: main
-compile:
-  env: default
-  command: /usr/bin/rustc -O -o {exe_path} {src_path}
-  maxCpuTime: 5s
-  maxRealTime: 10s
-  maxMemory: 512mb
-run:
-  env: default
-  command: /w/{exe_path}
 
 # 以下为特殊评测或交互评测使用的语言
 ---

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.util.CollectionUtils;
 import top.hcode.hoj.mapper.CommentMapper;
 import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.discussion.Comment;
@@ -55,8 +56,9 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
     private GroupMemberEntityService groupMemberEntityService;
 
     @Override
-    public IPage<CommentVO> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot, String uid) {
-        //新建分页
+    public IPage<CommentVO> getCommentList(int limit, int currentPage, Long cid, Integer did, Boolean isRoot,
+            String uid) {
+        // 新建分页
         Page<CommentVO> page = new Page<>(currentPage, limit);
 
         if (cid != null) {
@@ -66,7 +68,8 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
                     && !isRoot && !contest.getUid().equals(uid);
             if (onlyMineAndAdmin) { // 自己和比赛管理者评论可看
 
-                List<String> myAndAdminUidList = userInfoEntityService.getSuperAdminUidList();
+                List<String> myAndAdminUidList = userInfoEntityService.getNowContestAdmin(contest.getId());
+
                 myAndAdminUidList.add(uid);
                 myAndAdminUidList.add(contest.getUid());
                 Long gid = contest.getGid();
@@ -110,7 +113,6 @@ public class CommentEntityServiceImpl extends ServiceImpl<CommentMapper, Comment
         }
         msgRemindEntityService.saveOrUpdate(msgRemind);
     }
-
 
     @Async
     @Override

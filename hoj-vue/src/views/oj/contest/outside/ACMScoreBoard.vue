@@ -428,11 +428,23 @@
                 <div slot="content">
                   {{ problem.displayId + '. ' + problem.displayTitle }}
                   <br />
-                  {{ 'Accepted: ' + problem.ac }}
+                  {{
+                    'Accepted: ' +
+                      getProblemCount(problemACCountMap[problem.displayId])
+                  }}
                   <br />
-                  {{ 'Rejected: ' + (problem.total - problem.ac) }}
+                  {{
+                    'Rejected: ' +
+                      getProblemCount(problemErrorCountMap[problem.displayId])
+                  }}
                 </div>
-                <span>({{ problem.ac }}/{{ problem.total }}) </span>
+                <span>({{
+                    getProblemCount(problemACCountMap[problem.displayId])
+                  }}/{{
+                    getProblemCount(problemACCountMap[problem.displayId]) +
+                      getProblemCount(problemErrorCountMap[problem.displayId])
+                  }})
+                </span>
               </el-tooltip>
             </span>
           </template>
@@ -525,7 +537,9 @@ export default {
       CONTEST_STATUS: {},
       CONTEST_STATUS_REVERSE: {},
       CONTEST_TYPE_REVERSE: {},
-      RULE_TYPE: {}
+      RULE_TYPE: {},
+      problemACCountMap: {},
+      problemErrorCountMap: {},
     };
   },
   created() {
@@ -558,6 +572,8 @@ export default {
       }
     },
     applyToTable(dataRank) {
+      let acCountMap = {};
+      let errorCountMap = {};
       dataRank.forEach((rank, i) => {
         let info = rank.submissionInfo;
         let cellClass = {};
@@ -566,6 +582,16 @@ export default {
         }
         Object.keys(info).forEach((problemID) => {
           rank[problemID] = info[problemID];
+
+          if (!acCountMap[problemID]) {
+            acCountMap[problemID] = 0;
+          }
+          if (!errorCountMap[problemID]) {
+            errorCountMap[problemID] = 0;
+          }
+
+          errorCountMap[problemID] += info[problemID].errorNum;
+
           if (rank[problemID].ACTime != null) {
             rank[problemID].errorNum += 1;
             rank[problemID].specificTime = this.parseTimeToSpecific(
@@ -578,8 +604,10 @@ export default {
             cellClass[problemID] = "after-ac";
           } else if (status.isFirstAC) {
             cellClass[problemID] = "first-ac";
+            acCountMap[problemID] += 1;
           } else if (status.isAC) {
             cellClass[problemID] = "ac";
+            acCountMap[problemID] += 1;
           } else if (status.tryNum != null && status.tryNum > 0) {
             cellClass[problemID] = "try";
           } else if (status.errorNum != 0) {
@@ -599,6 +627,8 @@ export default {
         );
       });
       this.dataRank = dataRank;
+      this.problemACCountMap = acCountMap;
+      this.problemErrorCountMap = errorCountMap;
     },
     parseTimeToSpecific(totalTime) {
       return time.secondFormat(totalTime);
@@ -612,12 +642,12 @@ export default {
 };
 </script>
 <style scoped>
-@media screen and (min-width: 1050px) {
+/* @media screen and (min-width: 1050px) {
   .scoreboard-body {
     margin-left: -2%;
     margin-right: -2%;
   }
-}
+} */
 .contest-title {
   text-align: center;
 }

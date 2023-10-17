@@ -51,7 +51,8 @@ public class AdminAccountManager {
 
     public UserInfoVO login(LoginDTO loginDto) throws StatusFailException, StatusAccessDeniedException {
 
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder
+                .getRequestAttributes();
         HttpServletRequest request = servletRequestAttributes.getRequest();
         HttpServletResponse response = servletRequestAttributes.getResponse();
 
@@ -92,16 +93,15 @@ public class AdminAccountManager {
         userRolesVo.getRoles().stream()
                 .forEach(role -> rolesList.add(role.getRole()));
 
-
         if (rolesList.contains("admin") || rolesList.contains("root") || rolesList.contains("problem_admin")) { // 超级管理员或管理员、题目管理员
             String jwt = jwtUtils.generateToken(userRolesVo.getUid());
 
-            response.setHeader("Authorization", jwt); //放到信息头部
+            response.setHeader("Authorization", jwt); // 放到信息头部
             response.setHeader("Access-Control-Expose-Headers", "Authorization");
             // 会话记录
             sessionEntityService.save(new Session().setUid(userRolesVo.getUid())
                     .setIp(IpUtils.getUserIpAddr(request)).setUserAgent(request.getHeader("User-Agent")));
-            // 异步检查是否异地登录
+            // 异步检查是否异地登录 
             sessionEntityService.checkRemoteLogin(userRolesVo.getUid());
 
             UserInfoVO userInfoVo = new UserInfoVO();

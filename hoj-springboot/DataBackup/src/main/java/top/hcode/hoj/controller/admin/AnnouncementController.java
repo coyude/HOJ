@@ -10,7 +10,7 @@ import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.pojo.entity.common.Announcement;
 import top.hcode.hoj.pojo.vo.AnnouncementVO;
 import top.hcode.hoj.service.admin.announcement.AdminAnnouncementService;
-
+import org.apache.shiro.authz.annotation.Logical;
 
 /**
  * @Author: Himit_ZH
@@ -27,8 +27,9 @@ public class AnnouncementController {
 
     @GetMapping("/announcement")
     @RequiresPermissions("announcement_admin")
-    public CommonResult<IPage<AnnouncementVO>> getAnnouncementList(@RequestParam(value = "limit", required = false) Integer limit,
-                                                                   @RequestParam(value = "currentPage", required = false) Integer currentPage) {
+    public CommonResult<IPage<AnnouncementVO>> getAnnouncementList(
+            @RequestParam(value = "limit", required = false) Integer limit,
+            @RequestParam(value = "currentPage", required = false) Integer currentPage) {
         return adminAnnouncementService.getAnnouncementList(limit, currentPage);
     }
 
@@ -39,7 +40,7 @@ public class AnnouncementController {
     }
 
     @PostMapping("/announcement")
-    @RequiresRoles("root")  // 只有超级管理员能操作
+    @RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
     @RequiresPermissions("announcement_admin")
     public CommonResult<Void> addAnnouncement(@RequestBody Announcement announcement) {
         return adminAnnouncementService.addAnnouncement(announcement);

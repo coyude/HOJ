@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.apache.shiro.SecurityUtils;
@@ -15,6 +16,7 @@ import org.springframework.util.StringUtils;
 import top.hcode.hoj.common.exception.StatusFailException;
 import top.hcode.hoj.common.exception.StatusSystemErrorException;
 import top.hcode.hoj.dao.problem.ProblemEntityService;
+import top.hcode.hoj.dao.contest.ContestEntityService;
 import top.hcode.hoj.dao.user.*;
 import top.hcode.hoj.manager.email.EmailManager;
 import top.hcode.hoj.pojo.dto.ChangeEmailDTO;
@@ -22,9 +24,11 @@ import top.hcode.hoj.pojo.dto.ChangePasswordDTO;
 import top.hcode.hoj.pojo.dto.CheckUsernameOrEmailDTO;
 import top.hcode.hoj.pojo.entity.judge.Judge;
 import top.hcode.hoj.pojo.entity.problem.Problem;
+import top.hcode.hoj.pojo.entity.contest.Contest;
 import top.hcode.hoj.pojo.entity.user.Role;
 import top.hcode.hoj.pojo.entity.user.Session;
 import top.hcode.hoj.pojo.entity.user.UserAcproblem;
+import top.hcode.hoj.pojo.entity.contest.ContestRecord;
 import top.hcode.hoj.pojo.entity.user.UserInfo;
 import top.hcode.hoj.pojo.vo.*;
 import top.hcode.hoj.shiro.AccountProfile;
@@ -32,6 +36,7 @@ import top.hcode.hoj.utils.Constants;
 import top.hcode.hoj.utils.RedisUtils;
 import top.hcode.hoj.validator.CommonValidator;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,7 +65,13 @@ public class AccountManager {
     private UserAcproblemEntityService userAcproblemEntityService;
 
     @Autowired
+    private UserContestEntityService userContestEntityService;
+
+    @Autowired
     private ProblemEntityService problemEntityService;
+
+    @Autowired
+    private ContestEntityService contestEntityService;
 
     @Autowired
     private SessionEntityService sessionEntityService;
@@ -70,6 +81,9 @@ public class AccountManager {
 
     @Autowired
     private EmailManager emailManager;
+
+    @Resource
+    private ContestCalculateRankManager contestCalculateRankManager;
 
     /**
      * @MethodName checkUsernameOrEmail
@@ -166,6 +180,15 @@ public class AccountManager {
             disPlayIdList = problems.stream().map(Problem::getProblemId).collect(Collectors.toList());
         }
         userHomeInfo.setSolvedList(disPlayIdList);
+
+        // 获取用户最近一年参加的比赛
+        List<Long> contestsPidList = (List<Long>) getUserContestsRanking(uid, username).getSolvedList();
+        userHomeInfo.setContestPidList(contestsPidList);
+
+        // 获取用户最近一年参加比赛的榜单
+        List<HashMap<String,Object>> dataList= (List<HashMap<String,Object>>) getUserContestsRanking(uid, username).getDataList();
+        userHomeInfo.setDataList(dataList);
+
         QueryWrapper<Session> sessionQueryWrapper = new QueryWrapper<>();
         sessionQueryWrapper.eq("uid", userHomeInfo.getUid())
                 .orderByDesc("gmt_create")
@@ -225,6 +248,156 @@ public class AccountManager {
         return userCalendarHeatmapVo;
     }
 
+    /**
+     * @param uid
+     * @return
+     * @Description 获取用户最近一年参加的比赛
+     */
+    public List<Long> getUserContests(String uid) throws StatusFailException {
+        QueryWrapper<ContestRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("uid", uid)
+                .select("distinct cid");
+
+        List<ContestRecord> contestList = userContestEntityService.list(queryWrapper);
+        List<ContestRecord> userContestList = new ArrayList<>();
+
+        for (ContestRecord contestRecord : contestList) {
+
+            Long contestPid = contestRecord.getCid();
+            Contest contest = contestEntityService.getById(contestPid);
+
+            // 判断比赛是否存在
+            if (contest == null) {
+                continue;
+            }
+
+            // 获取已经结束, 不包含赛后提交，可见的ACM比赛的状态, 比赛结束后开榜的比赛
+            if (contest.getType().intValue() == Constants.Contest.TYPE_ACM.getCode()// ACM比赛
+                    && contest.getStatus().intValue() == 1 // 获取已经结束
+                    && contest.getVisible() // 可见
+                    && contest.getAutoRealRank() // 比赛结束后开榜的比赛
+            ) {
+                userContestList.add(contestRecord);
+            }
+        }
+
+        List<Long> contestsPidList = new LinkedList<>();
+        if (CollectionUtils.isEmpty(userContestList)) {
+            return contestsPidList;
+        }
+
+        List<Long> pidList = userContestList.stream().map(ContestRecord::getCid).collect(Collectors.toList());
+        if (pidList.size() > 0) {
+            QueryWrapper<Contest> contestQueryWrapper = new QueryWrapper<>();
+            contestQueryWrapper.select("id", "title");
+            contestQueryWrapper.in("id", pidList);
+            List<Contest> contests = contestEntityService.list(contestQueryWrapper);
+            contestsPidList = contests.stream().map(Contest::getId).collect(Collectors.toList());
+        }
+
+        return contestsPidList;
+    }
+
+    /**
+     * @param uid
+     * @param username
+     * @return
+     * @Description 获取用户最近一年的比赛名次变化图
+     */
+    public UserContestsRankingVO getUserContestsRanking(String uid, String username) throws StatusFailException {
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        if (StringUtils.isEmpty(uid) && StringUtils.isEmpty(username)) {
+            if (userRolesVo != null) {
+                uid = userRolesVo.getUid();
+            } else {
+                throw new StatusFailException("请求参数错误：uid和username不能都为空！");
+            }
+        }
+
+        List<Long> contestsPidList = getUserContests(uid);
+
+        UserContestsRankingVO userContestsRankingVO = new UserContestsRankingVO();
+        userContestsRankingVO.setEndDate(DateUtil.format(new Date(), "yyyy-MM-dd"));
+
+        if (CollectionUtils.isEmpty(contestsPidList)) {
+            userContestsRankingVO.setDataList(new ArrayList<>());
+            userContestsRankingVO.setSolvedList(new ArrayList<>());
+            return userContestsRankingVO;
+        }
+
+        List<HashMap<String, Object>> dataList = new ArrayList<>();
+        List<Long> contestPids = new ArrayList<>();
+        for (Long contestPid : contestsPidList) {
+            Contest contest = contestEntityService.getById(contestPid);
+            List<String> emptyStringList = new ArrayList<>();
+            List<Integer> emptyIntegerList = new ArrayList<>();
+
+            // 进行排序计算得到用户的排名
+            List<ACMContestRankVO> orderResultList = contestCalculateRankManager.calcACMRank(
+                    false,
+                    true,
+                    contest,
+                    userRolesVo.getUid(),
+                    emptyStringList,
+                    emptyIntegerList,
+                    false, // 去除赛后提交
+                    null);
+
+            if (StrUtil.isNotBlank(username)) {
+                String finalKeyword = username.trim().toLowerCase();
+                orderResultList = orderResultList.stream()
+                        .filter(rankVo -> filterBySchoolORRankShowName(finalKeyword,
+                                rankVo.getSchool(),
+                                getUserRankShowName(contest.getRankShowName(),
+                                        rankVo.getUsername(),
+                                        rankVo.getRealname(),
+                                        rankVo.getNickname())))
+                        .collect(Collectors.toList());
+            }
+            if (orderResultList.size() > 0) {
+                String user_uid = orderResultList.get(0).getUid();
+                if (user_uid.equals(uid)) {
+                    contestPids.add(contest.getId());
+                    Integer rank = orderResultList.get(0).getRank();
+                    Date startTime = contest.getStartTime();
+                    String dateStr = DateUtil.format(startTime, "yyyy-MM-dd");
+                    HashMap<String, Object> tmp = new HashMap<>(4);
+                    tmp.put("date", dateStr);
+                    tmp.put("rank", rank);
+                    tmp.put("cid", contest.getId());
+                    tmp.put("title", contest.getTitle());
+                    dataList.add(tmp);
+                }
+            }
+        }
+        if (CollectionUtils.isEmpty(dataList)) {
+            userContestsRankingVO.setSolvedList(new ArrayList<>());
+            userContestsRankingVO.setDataList(new ArrayList<>());
+            return userContestsRankingVO;
+        }
+        userContestsRankingVO.setSolvedList(contestPids);
+        userContestsRankingVO.setDataList(dataList);
+        return userContestsRankingVO;
+    }
+
+    private String getUserRankShowName(String contestRankShowName, String username, String realName, String nickname) {
+        switch (contestRankShowName) {
+            case "username":
+                return username;
+            case "realname":
+                return realName;
+            case "nickname":
+                return nickname;
+        }
+        return null;
+    }
+
+    private boolean filterBySchoolORRankShowName(String keyword, String school, String rankShowName) {
+        if (StrUtil.isNotEmpty(school) && school.toLowerCase().contains(keyword)) {
+            return true;
+        }
+        return StrUtil.isNotEmpty(rankShowName) && rankShowName.toLowerCase().contains(keyword);
+    }
 
     /**
      * @MethodName changePassword
@@ -232,7 +405,8 @@ public class AccountManager {
      * @Return
      * @Since 2021/1/8
      */
-    public ChangeAccountVO changePassword(ChangePasswordDTO changePasswordDto) throws StatusSystemErrorException, StatusFailException {
+    public ChangeAccountVO changePassword(ChangePasswordDTO changePasswordDto)
+            throws StatusSystemErrorException, StatusFailException {
         String oldPassword = changePasswordDto.getOldPassword();
         String newPassword = changePasswordDto.getNewPassword();
 
@@ -260,7 +434,8 @@ public class AccountManager {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             resp.setCode(403);
             Date afterDate = new Date(now.getTime() + expire * 1000);
-            String msg = "由于您多次修改密码失败，修改密码功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate) + ")再进行尝试！";
+            String msg = "由于您多次修改密码失败，修改密码功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate)
+                    + ")再进行尝试！";
             resp.setMsg(msg);
             return resp;
         }
@@ -302,7 +477,6 @@ public class AccountManager {
         }
     }
 
-
     public void getChangeEmailCode(String email) throws StatusFailException {
 
         String lockKey = Constants.Email.CHANGE_EMAIL_LOCK + email;
@@ -327,11 +501,10 @@ public class AccountManager {
         }
 
         String numbers = RandomUtil.randomNumbers(6); // 随机生成6位数字的组合
-        redisUtils.set(Constants.Email.CHANGE_EMAIL_KEY_PREFIX.getValue() + email, numbers, 10 * 60); //默认验证码有效10分钟
+        redisUtils.set(Constants.Email.CHANGE_EMAIL_KEY_PREFIX.getValue() + email, numbers, 10 * 60); // 默认验证码有效10分钟
         emailManager.sendChangeEmailCode(email, userRolesVo.getUsername(), numbers);
         redisUtils.set(lockKey, 0, 30);
     }
-
 
     /**
      * @MethodName changeEmail
@@ -339,7 +512,8 @@ public class AccountManager {
      * @Return
      * @Since 2021/1/9
      */
-    public ChangeAccountVO changeEmail(ChangeEmailDTO changeEmailDto) throws StatusSystemErrorException, StatusFailException {
+    public ChangeAccountVO changeEmail(ChangeEmailDTO changeEmailDto)
+            throws StatusSystemErrorException, StatusFailException {
 
         String password = changeEmailDto.getPassword();
         String newEmail = changeEmailDto.getNewEmail();
@@ -369,7 +543,8 @@ public class AccountManager {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             resp.setCode(403);
             Date afterDate = new Date(now.getTime() + expire * 1000);
-            String msg = "由于您多次修改邮箱失败，修改邮箱功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate) + ")再进行尝试！";
+            String msg = "由于您多次修改邮箱失败，修改邮箱功能已锁定，请在" + minute + "分" + second + "秒后(" + formatter.format(afterDate)
+                    + ")再进行尝试！";
             resp.setMsg(msg);
             return resp;
         }
@@ -464,12 +639,11 @@ public class AccountManager {
         }
     }
 
-
     public UserInfoVO changeUserInfo(UserInfoVO userInfoVo) throws StatusFailException {
 
-        commonValidator.validateContentLength(userInfoVo.getRealname(), "真实姓名",50);
-        commonValidator.validateContentLength(userInfoVo.getNickname(), "昵称",20);
-        commonValidator.validateContentLength(userInfoVo.getSignature(), "个性简介",65535);
+        commonValidator.validateContentLength(userInfoVo.getRealname(), "真实姓名", 50);
+        commonValidator.validateContentLength(userInfoVo.getNickname(), "昵称", 20);
+        commonValidator.validateContentLength(userInfoVo.getSignature(), "个性简介", 65535);
         commonValidator.validateContentLength(userInfoVo.getBlog(), "博客", 255);
         commonValidator.validateContentLength(userInfoVo.getGithub(), "Github", 255);
         commonValidator.validateContentLength(userInfoVo.getSchool(), "学校", 100);
@@ -507,10 +681,39 @@ public class AccountManager {
 
     }
 
-    public UserAuthInfoVO getUserAuthInfo(){
+    public UserInfoVO changeUserPreferences(UserInfoVO userInfoVo) throws StatusFailException {
+
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        //获取该用户角色所有的权限
+
+        UpdateWrapper<UserInfo> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("uuid", userRolesVo.getUid())
+                .set("ui_language", userInfoVo.getUiLanguage())
+                .set("code_language", userInfoVo.getCodeLanguage())
+                .set("code_size", userInfoVo.getCodeSize())
+                .set("ide_theme", userInfoVo.getIdeTheme())
+                .set("code_template", userInfoVo.getCodeTemplate());
+
+        boolean isOk = userInfoEntityService.update(updateWrapper);
+
+        if (isOk) {
+            UserRolesVO userRoles = userRoleEntityService.getUserRoles(userRolesVo.getUid(), null);
+            // 更新session
+            BeanUtil.copyProperties(userRoles, userRolesVo);
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtil.copyProperties(userRoles, userInfoVO, "roles");
+            userInfoVO.setRoleList(userRoles.getRoles().stream().map(Role::getRole).collect(Collectors.toList()));
+            return userInfoVO;
+        } else {
+            throw new StatusFailException("更新个人信息失败！");
+        }
+
+    }
+
+    public UserAuthInfoVO getUserAuthInfo() {
+        // 获取当前登录的用户
+        AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
+        // 获取该用户角色所有的权限
         List<Role> roles = userRoleEntityService.getRolesByUid(userRolesVo.getUid());
         UserAuthInfoVO authInfoVO = new UserAuthInfoVO();
         authInfoVO.setRoles(roles.stream().map(Role::getRole).collect(Collectors.toList()));

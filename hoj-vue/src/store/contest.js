@@ -34,7 +34,7 @@ const getters = {
   },
   isContestAdmin: (state, getters, _, rootGetters) => {
     return rootGetters.isAuthenticated &&
-      (state.contest.author === rootGetters.userInfo.username || rootGetters.isSuperAdmin || state.groupContestAuth == 5)
+      (state.contest.author === rootGetters.userInfo.username || rootGetters.isSuperAdmin || rootGetters.isNormalAdmin || state.groupContestAuth == 5)
   },
   isContainsAfterContestJudge: (state, getters) => {
     return state.isContainsAfterContestJudge;
@@ -43,7 +43,7 @@ const getters = {
      return state.intoAccess||state.submitAccess || state.contest.auth === CONTEST_TYPE.PUBLIC ||getters.isContestAdmin
   },
   contestMenuDisabled: (state, getters) => {
-    // 比赛创建者或者超级管理员可以直接查看
+    // 比赛创建者或者超级管理员或者题目管理可以直接查看
     if (getters.isContestAdmin) return false
      // 未开始不可查看
     if(getters.contestStatus === CONTEST_STATUS.SCHEDULED) return true
@@ -52,7 +52,7 @@ const getters = {
      // 私有赛需要通过验证密码方可查看比赛
       return !state.intoAccess
     }
-    
+
   },
 
   // 榜单是否实时刷新
@@ -87,7 +87,7 @@ const getters = {
   // 是否需要显示密码验证框
   passwordFormVisible: (state, getters) => {
     // 如果是公开赛，保护赛，或已注册过，管理员都不用再显示
-    return state.contest.auth !== CONTEST_TYPE.PUBLIC &&state.contest.auth !== CONTEST_TYPE.PROTECTED &&!state.intoAccess && !getters.isContestAdmin 
+    return state.contest.auth !== CONTEST_TYPE.PUBLIC &&state.contest.auth !== CONTEST_TYPE.PROTECTED &&!state.intoAccess && !getters.isContestAdmin
   },
   contestStartTime: (state) => {
     return moment(state.contest.startTime)
@@ -124,7 +124,7 @@ const getters = {
         state.contest.status = CONTEST_STATUS.ENDED
         return "00:00:00"
       }
-      
+
     } else {
       return 'Ended'
     }
@@ -243,7 +243,9 @@ const actions = {
       api.getScoreBoardContestInfo(rootState.route.params.contestID).then((res) => {
         resolve(res)
         let contest = res.data.data.contest;
+        let problemList = res.data.data.problemList;
         commit('changeContest', {contest: contest})
+        commit('changeContestProblems', {contestProblems: problemList})
         commit('now', {now: moment(contest.now)})
       }, err => {
         reject(err)

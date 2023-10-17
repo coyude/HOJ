@@ -39,7 +39,7 @@ public class AtCoderProblemStrategy extends ProblemStrategy {
 
         problemId = problemId.toLowerCase();
         boolean isMatch = ReUtil.isMatch("[a-z]+[0-9]+_[a-z]*[0-9]*", problemId);
-        if (!isMatch && !problemId.contains("_")){
+        if (!isMatch){
             throw new IllegalArgumentException("AtCoder: Incorrect problem id format! Must be like `abc110_a`");
         }
 

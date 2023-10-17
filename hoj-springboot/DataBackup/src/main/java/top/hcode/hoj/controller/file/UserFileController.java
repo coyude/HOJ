@@ -1,6 +1,5 @@
 package top.hcode.hoj.controller.file;
 
-
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import top.hcode.hoj.service.file.UserFileService;
+import org.apache.shiro.authz.annotation.Logical;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class UserFileController {
 
     @RequestMapping("/generate-user-excel")
     @RequiresAuthentication
-    @RequiresRoles("root")
+    @RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
     public void generateUserExcel(@RequestParam("key") String key, HttpServletResponse response) throws IOException {
         userFileService.generateUserExcel(key, response);
     }

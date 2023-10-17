@@ -8,7 +8,7 @@
               <span class="panel-title">{{ contest.title }}</span>
             </div>
           </div>
-          <el-row style="margin-top: 10px;">
+          <el-row style="margin-top: 10px">
             <el-col :span="14" class="text-align:left">
               <el-tooltip
                 v-if="contest.auth != null && contest.auth != undefined"
@@ -18,31 +18,33 @@
                 <el-tag
                   :type.sync="CONTEST_TYPE_REVERSE[contest.auth]['color']"
                   effect="plain"
-                  style="font-size:13px"
+                  style="font-size: 13px"
                 >
                   <i class="el-icon-collection-tag"></i>
-                  {{ $t('m.' + CONTEST_TYPE_REVERSE[contest.auth]['name']) }}
+                  {{ $t("m." + CONTEST_TYPE_REVERSE[contest.auth]["name"]) }}
                 </el-tag>
               </el-tooltip>
               <el-tooltip
                 v-if="contest.gid != null"
                 :content="$t('m.Go_To_Group_Contest_List')"
-                style="margin-left:10px;"
-                placement="top">
-                <el-button 
-                  size="small" 
+                style="margin-left: 10px"
+                placement="top"
+              >
+                <el-button
+                  size="small"
                   type="primary"
-                  @click="toGroupContestList(contest.gid)">
+                  @click="toGroupContestList(contest.gid)"
+                >
                   <i class="fa fa-users"></i>
-                    {{ $t('m.Group_Contest_Tag')}}
+                  {{ $t("m.Group_Contest_Tag") }}
                 </el-button>
-             </el-tooltip>
+              </el-tooltip>
             </el-col>
-            <el-col :span="10" style="text-align:right">
+            <el-col :span="10" style="text-align: right">
               <el-button size="small" plain v-if="contest.count != null">
                 <i
                   class="el-icon-user-solid"
-                  style="color:rgb(48, 145, 242);"
+                  style="color: rgb(48, 145, 242)"
                 ></i
                 >x{{ contest.count }}
               </el-button>
@@ -56,14 +58,14 @@
                 <el-tooltip
                   :content="
                     $t('m.Contest_Rank') +
-                      '：' +
-                      (contest.oiRankScoreType == 'Recent'
-                        ? $t(
-                            'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
-                          )
-                        : $t(
-                            'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
-                          ))
+                    '：' +
+                    (contest.oiRankScoreType == 'Recent'
+                      ? $t(
+                          'm.Based_on_The_Recent_Score_Submitted_Of_Each_Problem'
+                        )
+                      : $t(
+                          'm.Based_on_The_Highest_Score_Submitted_For_Each_Problem'
+                        ))
                   "
                   placement="top"
                 >
@@ -80,26 +82,32 @@
               <el-col :xs="24" :md="12" class="left">
                 <p>
                   <i class="fa fa-hourglass-start" aria-hidden="true"></i>
-                  {{ $t('m.StartAt') }}：{{ contest.startTime | localtime }}
+                  {{ $t("m.StartAt") }}：{{ contest.startTime | localtime }}
                 </p>
               </el-col>
               <el-col :xs="24" :md="12" class="right">
                 <p>
                   <i class="fa fa-hourglass-end" aria-hidden="true"></i>
-                  {{ $t('m.EndAt') }}：{{ contest.endTime | localtime }}
+                  {{ $t("m.EndAt") }}：{{ contest.endTime | localtime }}
                 </p>
               </el-col>
             </el-row>
           </div>
-          <div class="slider">
-            <el-slider
+          <div style="width: 100%">
+            <!-- <el-slider
               v-model="progressValue"
               :format-tooltip="formatTooltip"
               :step="timeStep"
-            ></el-slider>
+            ></el-slider> -->
+            <Timebar
+              :progressValue="progressValue"
+              :Tooltip="formatTooltip()"
+              @transfer="getStopFlag"
+            />
+            <p></p>
           </div>
           <el-row>
-            <el-col :span="24" style="text-align:center">
+            <el-col :span="24" style="text-align: center">
               <el-tag effect="dark" size="medium" :style="countdownColor">
                 <i class="fa fa-circle" aria-hidden="true"></i>
                 {{ countdown }}
@@ -107,24 +115,17 @@
             </el-col>
           </el-row>
           <div class="contest-config" v-if="isShowContestSetting">
-            <el-popover
-              trigger="hover"
-              placement="left-start"
-            >
-              <el-button
-                round
-                size="small"
-                slot="reference"
-              >
-                {{$t('m.Contest_Setting')}}
+            <el-popover trigger="hover" placement="left-start">
+              <el-button round size="small" slot="reference">
+                {{ $t("m.Contest_Setting") }}
               </el-button>
               <div class="contest-config-switches">
                 <p>
-                  <span>{{ $t('m.Contains_Submission_After_Contest') }}</span>
+                  <span>{{ $t("m.Contains_Submission_After_Contest") }}</span>
                   <el-switch v-model="isContainsAfterContestJudge"></el-switch>
                 </p>
-                </div>
-              </el-popover>
+              </div>
+            </el-popover>
           </div>
         </el-card>
       </el-col>
@@ -135,22 +136,22 @@
       <el-tabs @tab-click="tabClick" v-model="route_name">
         <el-tab-pane name="ContestDetails" lazy>
           <span slot="label"
-            ><i class="el-icon-s-home"></i>&nbsp;{{ $t('m.Overview') }}</span
+            ><i class="el-icon-s-home"></i>&nbsp;{{ $t("m.Overview") }}</span
           >
           <el-card
             v-if="passwordFormVisible"
             class="password-form-card"
-            style="text-align:center;margin-bottom:15px"
+            style="text-align: center; margin-bottom: 15px"
           >
             <div slot="header">
-              <span class="panel-title" style="color: #e6a23c;"
+              <span class="panel-title" style="color: #e6a23c"
                 ><i class="el-icon-warning">
-                  {{ $t('m.Password_Required') }}</i
+                  {{ $t("m.Password_Required") }}</i
                 ></span
               >
             </div>
             <p class="password-form-tips">
-              {{ $t('m.To_Enter_Need_Password') }}
+              {{ $t("m.To_Enter_Need_Password") }}
             </p>
             <el-form>
               <el-input
@@ -158,20 +159,21 @@
                 type="password"
                 :placeholder="$t('m.Enter_the_contest_password')"
                 @keydown.enter.native="checkPassword"
-                style="width:70%"
+                style="width: 70%"
               />
               <el-button
                 type="primary"
                 @click="checkPassword"
-                style="float:right;"
-                >{{ $t('m.Enter') }}</el-button
+                style="float: right"
+                >{{ $t("m.Enter") }}</el-button
               >
             </el-form>
           </el-card>
           <el-card class="box-card">
-            <Markdown 
-              :isAvoidXss="contest.gid != null" 
-              :content="contest.description">
+            <Markdown
+              :isAvoidXss="contest.gid != null"
+              :content="contest.description"
+            >
             </Markdown>
           </el-card>
         </el-tab-pane>
@@ -183,7 +185,7 @@
         >
           <span slot="label"
             ><i class="fa fa-list" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Problem')
+              $t("m.Problem")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -199,7 +201,7 @@
           :disabled="contestMenuDisabled"
         >
           <span slot="label"
-            ><i class="el-icon-menu"></i>&nbsp;{{ $t('m.Status') }}</span
+            ><i class="el-icon-menu"></i>&nbsp;{{ $t("m.Status") }}</span
           >
           <transition name="el-zoom-in-bottom">
             <router-view
@@ -211,7 +213,7 @@
         <el-tab-pane name="ContestRank" lazy :disabled="contestMenuDisabled">
           <span slot="label"
             ><i class="fa fa-bar-chart" aria-hidden="true"></i>&nbsp;{{
-              $t('m.NavBar_Rank')
+              $t("m.NavBar_Rank")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -226,7 +228,7 @@
         >
           <span slot="label"
             ><i class="fa fa-bullhorn" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Announcement')
+              $t("m.Announcement")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -236,14 +238,15 @@
           </transition>
         </el-tab-pane>
 
-        <el-tab-pane 
-          name="ContestComment" 
-          lazy 
+        <el-tab-pane
+          name="ContestComment"
+          lazy
           :disabled="contestMenuDisabled"
-          v-if="websiteConfig.openContestComment">
+          v-if="websiteConfig.openContestComment"
+        >
           <span slot="label"
             ><i class="fa fa-commenting" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Comment')
+              $t("m.Comment")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -258,7 +261,7 @@
           v-if="contest.openPrint"
         >
           <span slot="label"
-            ><i class="el-icon-printer"></i>&nbsp;{{ $t('m.Print') }}</span
+            ><i class="el-icon-printer"></i>&nbsp;{{ $t("m.Print") }}</span
           >
           <transition name="el-zoom-in-bottom">
             <router-view v-if="route_name === 'ContestPrint'"></router-view>
@@ -273,7 +276,7 @@
         >
           <span slot="label"
             ><i class="el-icon-s-help" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Admin_Helper')
+              $t("m.Admin_Helper")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -289,7 +292,7 @@
         >
           <span slot="label"
             ><i class="el-icon-printer"></i>&nbsp;{{
-              $t('m.Admin_Print')
+              $t("m.Admin_Print")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -303,11 +306,11 @@
           name="ContestRejudgeAdmin"
           lazy
           :disabled="contestMenuDisabled"
-          v-if="isSuperAdmin"
+          v-if="isContestAdmin"
         >
           <span slot="label"
             ><i class="el-icon-refresh" aria-hidden="true"></i>&nbsp;{{
-              $t('m.Rejudge')
+              $t("m.Rejudge")
             }}</span
           >
           <transition name="el-zoom-in-bottom">
@@ -324,68 +327,71 @@
           v-if="showScrollBoard"
         >
           <span slot="label"
-            ><i class="el-icon-video-camera-solid" aria-hidden="true"></i>&nbsp;{{
-              $t('m.ScrollBoard')
-            }}</span
+            ><i class="el-icon-video-camera-solid" aria-hidden="true"></i
+            >&nbsp;{{ $t("m.ScrollBoard") }}</span
           >
           <transition name="el-zoom-in-bottom">
-            <router-view
-              v-if="route_name === 'ScrollBoard'"
-            ></router-view>
+            <router-view v-if="route_name === 'ScrollBoard'"></router-view>
           </transition>
         </el-tab-pane>
-
       </el-tabs>
     </div>
   </div>
 </template>
 <script>
-import time from '@/common/time';
-import moment from 'moment';
-import api from '@/common/api';
-import { mapState, mapGetters, mapActions } from 'vuex';
-import { addCodeBtn } from '@/common/codeblock';
+import time from "@/common/time";
+import moment from "moment";
+import api from "@/common/api";
+import { mapState, mapGetters, mapActions } from "vuex";
+import { addCodeBtn } from "@/common/codeblock";
+import Timebar from "@/components/oj/common/Timebar.vue";
+
 import {
   CONTEST_STATUS_REVERSE,
   CONTEST_STATUS,
   CONTEST_TYPE_REVERSE,
   RULE_TYPE,
   buildContestAnnounceKey,
-} from '@/common/constants';
-import myMessage from '@/common/message';
-import storage from '@/common/storage';
+} from "@/common/constants";
+import myMessage from "@/common/message";
+import storage from "@/common/storage";
 import Markdown from "@/components/oj/common/Markdown";
+import ClickRank from "@/views/oj/contest/ClickRank";
+
 export default {
-  name: 'ContestDetails',
+  name: "ContestDetails",
   components: {
-    Markdown
+    Markdown,
+    Timebar,
   },
   data() {
     return {
-      route_name: 'contestDetails',
+      percentage: -1, // 点击点占总长度的距离
+      sliderValue: 0,
+      route_name: "contestDetails",
       timer: null,
       CONTEST_STATUS: {},
       CONTEST_STATUS_REVERSE: {},
       CONTEST_TYPE_REVERSE: {},
       RULE_TYPE: {},
       btnLoading: false,
-      contestPassword: '',
+      contestPassword: "",
     };
   },
   created() {
     this.contestID = this.$route.params.contestID;
     this.route_name = this.$route.name;
-    if (this.route_name == 'ContestProblemDetails') {
-      this.route_name = 'ContestProblemList';
+    if (this.route_name == "ContestProblemDetails") {
+      this.route_name = "ContestProblemList";
     }
-    if (this.route_name == 'ContestSubmissionDetails') {
-      this.route_name = 'ContestSubmissionList';
+    if (this.route_name == "ContestSubmissionDetails") {
+      this.route_name = "ContestSubmissionList";
     }
     this.CONTEST_TYPE_REVERSE = Object.assign({}, CONTEST_TYPE_REVERSE);
     this.CONTEST_STATUS = Object.assign({}, CONTEST_STATUS);
     this.CONTEST_STATUS_REVERSE = Object.assign({}, CONTEST_STATUS_REVERSE);
     this.RULE_TYPE = Object.assign({}, RULE_TYPE);
-    this.$store.dispatch('getContest').then((res) => {
+    this.$store.dispatch("getContest").then((res) => {
       this.changeDomTitle({ title: res.data.data.title });
       let data = res.data.data;
       let endTime = moment(data.endTime);
@@ -393,7 +399,7 @@ export default {
       if (endTime.isAfter(moment(data.now))) {
         // 实时更新时间
         this.timer = setInterval(() => {
-          this.$store.commit('nowAdd1s');
+          this.$store.commit("nowAdd1s");
         }, 1000);
 
         // 每分钟获取一次是否存在未阅读的公告
@@ -414,19 +420,20 @@ export default {
                 message:
                   '<p style="text-align:center;"><i class="el-icon-time"> ' +
                   time.utcToLocal(newAnnounceList[i].gmtCreate) +
-                  '</i></p>' +
+                  "</i></p>" +
                   '<p style="text-align:center;color:#409eff">' +
                   this.$i18n.t(
-                    'm.Please_check_the_contest_announcement_for_details'
+                    "m.Please_check_the_contest_announcement_for_details"
                   ) +
-                  '</p>',
-                type: 'warning',
+                  "</p>",
+                type: "warning",
                 dangerouslyUseHTMLString: true,
                 duration: 0,
               });
             }
             storage.set(key, readAnnouncementList);
           });
+          n;
         }, 60 * 1000);
       }
 
@@ -436,27 +443,38 @@ export default {
     });
   },
   methods: {
-    ...mapActions(['changeDomTitle']),
+    ...mapActions(["changeDomTitle"]),
+    getStopFlag(percentage) {
+      this.percentage = percentage;
+    },
     formatTooltip(val) {
-      if (this.contest.status == -1) {
-        // 还未开始
-        return '00:00:00';
-      } else if (this.contest.status == 0) {
-        return time.secondFormat(this.BeginToNowDuration); // 格式化时间
+      if (this.percentage !== -1) {
+        const nowTime = this.contest.duration * this.percentage;
+
+        // 查询对应的榜单
+        ClickRank.$emit("clickGetContestRank", 1, false, parseInt(nowTime));
+        return time.secondFormat(nowTime); // 格式化时间
       } else {
-        return time.secondFormat(this.contest.duration);
+        if (this.contest.status == -1) {
+          // 还未开始
+          return "00:00:00";
+        } else if (this.contest.status == 0) {
+          return time.secondFormat(this.BeginToNowDuration);
+        } else {
+          return time.secondFormat(this.contest.duration);
+        }
       }
     },
     checkPassword() {
-      if (this.contestPassword === '') {
-        myMessage.warning(this.$i18n.t('m.Enter_the_contest_password'));
+      if (this.contestPassword === "") {
+        myMessage.warning(this.$i18n.t("m.Enter_the_contest_password"));
         return;
       }
       this.btnLoading = true;
-      api.registerContest(this.contestID + '', this.contestPassword).then(
+      api.registerContest(this.contestID + "", this.contestPassword).then(
         (res) => {
-          myMessage.success(this.$i18n.t('m.Register_contest_successfully'));
-          this.$store.commit('contestIntoAccess', { intoAccess: true });
+          myMessage.success(this.$i18n.t("m.Register_contest_successfully"));
+          this.$store.commit("contestIntoAccess", { intoAccess: true });
           this.btnLoading = false;
         },
         (res) => {
@@ -470,13 +488,13 @@ export default {
         this.$router.push({ name: name });
       }
     },
-    toGroupContestList(gid){
+    toGroupContestList(gid) {
       this.$router.push({
-        name: 'GroupContestList',
+        name: "GroupContestList",
         params: {
           groupID: gid,
         },
-      })
+      });
     },
   },
   computed: {
@@ -485,24 +503,23 @@ export default {
       now: (state) => state.contest.now,
     }),
     ...mapGetters([
-      'contestMenuDisabled',
-      'contestRuleType',
-      'contestStatus',
-      'countdown',
-      'isShowContestSetting',
-      'BeginToNowDuration',
-      'isContestAdmin',
-      'isSuperAdmin',
-      'ContestRealTimePermission',
-      'passwordFormVisible',
-      'userInfo',
-      'websiteConfig',
+      "contestMenuDisabled",
+      "contestRuleType",
+      "contestStatus",
+      "countdown",
+      "isShowContestSetting",
+      "BeginToNowDuration",
+      "isContestAdmin",
+      "ContestRealTimePermission",
+      "passwordFormVisible",
+      "userInfo",
+      "websiteConfig",
     ]),
     progressValue: {
-      get: function() {
+      get: function () {
         return this.$store.getters.progressValue;
       },
-      set: function() {},
+      set: function () {},
     },
     timeStep() {
       // 时间段平分滑条长度
@@ -510,34 +527,34 @@ export default {
     },
     countdownColor() {
       if (this.contestStatus) {
-        return 'color:' + CONTEST_STATUS_REVERSE[this.contestStatus].color;
+        return "color:" + CONTEST_STATUS_REVERSE[this.contestStatus].color;
       }
     },
     showAdminHelper() {
       return this.isContestAdmin && this.contestRuleType === RULE_TYPE.ACM;
     },
-    showScrollBoard(){
+    showScrollBoard() {
       return this.isContestAdmin && this.contestRuleType === RULE_TYPE.ACM;
     },
     contestEnded() {
       return this.contestStatus === CONTEST_STATUS.ENDED;
     },
-    isContainsAfterContestJudge:{
-      get () {
+    isContainsAfterContestJudge: {
+      get() {
         return this.$store.state.contest.isContainsAfterContestJudge;
       },
-      set (value) {
-        this.$store.commit('changeContainsAfterContestJudge', {value: value})
-      }
+      set(value) {
+        this.$store.commit("changeContainsAfterContestJudge", { value: value });
+      },
     },
   },
   watch: {
     $route(newVal) {
       this.route_name = newVal.name;
-      if (newVal.name == 'ContestProblemDetails') {
-        this.route_name = 'ContestProblemList';
-      } else if (this.route_name == 'ContestSubmissionDetails') {
-        this.route_name = 'ContestSubmissionList';
+      if (newVal.name == "ContestProblemDetails") {
+        this.route_name = "ContestProblemList";
+      } else if (this.route_name == "ContestSubmissionDetails") {
+        this.route_name = "ContestSubmissionList";
       }
       this.contestID = newVal.params.contestID;
       this.changeDomTitle({ title: this.contest.title });
@@ -546,7 +563,7 @@ export default {
   beforeDestroy() {
     clearInterval(this.timer);
     clearInterval(this.announceTimer);
-    this.$store.commit('clearContest');
+    this.$store.commit("clearContest");
   },
 };
 </script>
@@ -573,7 +590,7 @@ export default {
     text-align: center;
   }
 }
-/deep/.el-slider__button {
+/* /deep/.el-slider__button {
   width: 20px !important;
   height: 20px !important;
   background-color: #409eff !important;
@@ -584,7 +601,7 @@ export default {
 /deep/.el-slider__bar {
   height: 10px !important;
   background-color: #09be24 !important;
-}
+} */
 /deep/ .el-card__header {
   border-bottom: 0px;
   padding-bottom: 0px;

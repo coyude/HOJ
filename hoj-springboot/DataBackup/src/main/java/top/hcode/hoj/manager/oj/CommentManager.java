@@ -86,12 +86,16 @@ public class CommentManager {
 
     private final static Pattern pattern = Pattern.compile("<.*?([a,A][u,U][t,T][o,O][p,P][l,L][a,A][y,Y]).*?>");
 
-    public CommentListVO getComments(Long cid, Integer did, Integer limit, Integer currentPage) throws StatusForbiddenException, AccessException {
+    public CommentListVO getComments(Long cid, Integer did, Integer limit, Integer currentPage)
+            throws StatusForbiddenException, AccessException {
 
         // 如果有登录，则获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (cid == null && did != null) {
             QueryWrapper<Discussion> discussionQueryWrapper = new QueryWrapper<>();
@@ -142,7 +146,6 @@ public class CommentManager {
         return commentListVo;
     }
 
-
     @Transactional
     public CommentVO addComment(Comment comment) throws StatusFailException, StatusForbiddenException, AccessException {
 
@@ -151,15 +154,15 @@ public class CommentManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long cid = comment.getCid();
 
         // 比赛外的评论 除管理员外 只有AC 10道以上才可评论
         if (cid == null) {
-
             QueryWrapper<Discussion> discussionQueryWrapper = new QueryWrapper<>();
             discussionQueryWrapper.select("id", "gid").eq("id", comment.getDid());
             Discussion discussion = discussionEntityService.getOne(discussionQueryWrapper);
@@ -176,7 +179,7 @@ public class CommentManager {
                 accessValidator.validateAccess(HOJAccessEnum.PUBLIC_DISCUSSION);
             }
 
-            if (!isRoot && !isProblemAdmin && !isAdmin) {
+            if (!isRoot) {
                 QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
                 int userAcProblemCount = userAcproblemEntityService.count(queryWrapper);
@@ -203,8 +206,7 @@ public class CommentManager {
 
         if (SecurityUtils.getSubject().hasRole("root")) {
             comment.setFromRole("root");
-        } else if (SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        } else if (isRoot) {
             comment.setFromRole("admin");
         } else {
             comment.setFromRole("user");
@@ -260,9 +262,10 @@ public class CommentManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long cid = comment.getCid();
         if (cid == null) {
@@ -272,7 +275,7 @@ public class CommentManager {
             Long gid = discussion.getGid();
             if (gid == null) {
                 accessValidator.validateAccess(HOJAccessEnum.PUBLIC_DISCUSSION);
-                if (!comment.getFromUid().equals(userRolesVo.getUid()) && !isRoot && !isProblemAdmin && !isAdmin) {
+                if (!comment.getFromUid().equals(userRolesVo.getUid()) && !isRoot) {
                     throw new StatusForbiddenException("无权删除该评论");
                 }
             } else {
@@ -317,7 +320,8 @@ public class CommentManager {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void addCommentLike(Integer cid, Boolean toLike, Integer sourceId, String sourceType) throws StatusFailException {
+    public void addCommentLike(Integer cid, Boolean toLike, Integer sourceId, String sourceType)
+            throws StatusFailException {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
@@ -343,7 +347,8 @@ public class CommentManager {
                 commentEntityService.updateById(comment);
                 // 当前的评论要不是点赞者的 才发送点赞消息
                 if (!userRolesVo.getUsername().equals(comment.getFromName())) {
-                    commentEntityService.updateCommentLikeMsg(comment.getFromUid(), userRolesVo.getUid(), sourceId, sourceType);
+                    commentEntityService.updateCommentLikeMsg(comment.getFromUid(), userRolesVo.getUid(), sourceId,
+                            sourceType);
                 }
             }
         } else { // 取消点赞
@@ -361,11 +366,15 @@ public class CommentManager {
 
     }
 
-    public List<ReplyVO> getAllReply(Integer commentId, Long cid) throws StatusForbiddenException, StatusFailException, AccessException {
+    public List<ReplyVO> getAllReply(Integer commentId, Long cid)
+            throws StatusForbiddenException, StatusFailException, AccessException {
 
         // 如果有登录，则获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         if (cid == null) {
             Comment comment = commentEntityService.getById(commentId);
@@ -393,7 +402,6 @@ public class CommentManager {
                 commentId);
     }
 
-
     public ReplyVO addReply(ReplyDTO replyDto) throws StatusFailException, StatusForbiddenException, AccessException {
 
         commonValidator.validateContent(replyDto.getReply().getContent(), "回复", 10000);
@@ -401,13 +409,14 @@ public class CommentManager {
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
 
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Reply reply = replyDto.getReply();
 
-        if (reply == null || reply.getCommentId() == null){
+        if (reply == null || reply.getCommentId() == null) {
             throw new StatusFailException("回复失败，当前请求的参数错误！");
         }
 
@@ -434,7 +443,7 @@ public class CommentManager {
                 accessValidator.validateAccess(HOJAccessEnum.PUBLIC_DISCUSSION);
             }
 
-            if (!isRoot && !isProblemAdmin && !isAdmin) {
+            if (!isRoot) {
                 QueryWrapper<UserAcproblem> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("uid", userRolesVo.getUid()).select("distinct pid");
                 int userAcProblemCount = userAcproblemEntityService.count(queryWrapper);
@@ -461,8 +470,7 @@ public class CommentManager {
 
         if (SecurityUtils.getSubject().hasRole("root")) {
             reply.setFromRole("root");
-        } else if (SecurityUtils.getSubject().hasRole("admin")
-                || SecurityUtils.getSubject().hasRole("problem_admin")) {
+        } else if (isRoot) {
             reply.setFromRole("admin");
         } else {
             reply.setFromRole("user");
@@ -503,7 +511,7 @@ public class CommentManager {
 
         Reply reply = replyDto.getReply();
 
-        if (reply == null || reply.getId() == null){
+        if (reply == null || reply.getId() == null) {
             throw new StatusFailException("删除失败，删除的回复不可为空！");
         }
 
@@ -520,9 +528,10 @@ public class CommentManager {
 
         // 获取当前登录的用户
         AccountProfile userRolesVo = (AccountProfile) SecurityUtils.getSubject().getPrincipal();
-        boolean isRoot = SecurityUtils.getSubject().hasRole("root");
-        boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");
-        boolean isAdmin = SecurityUtils.getSubject().hasRole("admin");
+        // 是否为超级管理员或者题目管理或者普通管理
+        boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                || SecurityUtils.getSubject().hasRole("problem_admin")
+                || SecurityUtils.getSubject().hasRole("admin");
 
         Long cid = comment.getCid();
         if (cid == null) {
@@ -531,9 +540,7 @@ public class CommentManager {
             if (gid == null) {
                 accessValidator.validateAccess(HOJAccessEnum.PUBLIC_DISCUSSION);
                 if (!reply.getFromUid().equals(userRolesVo.getUid())
-                        && !isRoot
-                        && !isProblemAdmin
-                        && !isAdmin) {
+                        && !isRoot) {
                     throw new StatusForbiddenException("无权删除该回复");
                 }
             } else {

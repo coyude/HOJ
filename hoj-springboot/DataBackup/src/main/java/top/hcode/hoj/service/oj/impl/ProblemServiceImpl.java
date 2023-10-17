@@ -16,6 +16,7 @@ import top.hcode.hoj.pojo.vo.ProblemInfoVO;
 import top.hcode.hoj.pojo.vo.ProblemVO;
 import top.hcode.hoj.pojo.vo.RandomProblemVO;
 import top.hcode.hoj.service.oj.ProblemService;
+import top.hcode.hoj.pojo.vo.ProblemLastIdVO;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
@@ -33,14 +34,25 @@ public class ProblemServiceImpl implements ProblemService {
     private ProblemManager problemManager;
 
     @Override
-    public CommonResult<Page<ProblemVO>> getProblemList(Integer limit, Integer currentPage, String keyword, List<Long> tagId, Integer difficulty, String oj) {
-        return CommonResult.successResponse(problemManager.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj));
+    public CommonResult<Page<ProblemVO>> getProblemList(Integer limit, Integer currentPage, String keyword,
+            List<Long> tagId, Integer difficulty, String oj) {
+        return CommonResult
+                .successResponse(problemManager.getProblemList(limit, currentPage, keyword, tagId, difficulty, oj));
     }
 
     @Override
-    public CommonResult<RandomProblemVO> getRandomProblem() {
+    public CommonResult<RandomProblemVO> getRandomProblem(String oj) {
         try {
-            return CommonResult.successResponse(problemManager.getRandomProblem());
+            return CommonResult.successResponse(problemManager.getRandomProblem(oj));
+        } catch (StatusFailException e) {
+            return CommonResult.errorResponse(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResult<ProblemLastIdVO> getProblemLastId() {
+        try {
+            return CommonResult.successResponse(problemManager.getProblemLastId());
         } catch (StatusFailException e) {
             return CommonResult.errorResponse(e.getMessage());
         }

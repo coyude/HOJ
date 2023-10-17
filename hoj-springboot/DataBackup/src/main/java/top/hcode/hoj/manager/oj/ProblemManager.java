@@ -1,5 +1,7 @@
 package top.hcode.hoj.manager.oj;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -85,10 +87,12 @@ public class ProblemManager {
      * @Since 2020/10/27
      */
     public Page<ProblemVO> getProblemList(Integer limit, Integer currentPage,
-                                          String keyword, List<Long> tagId, Integer difficulty, String oj) {
+            String keyword, List<Long> tagId, Integer difficulty, String oj) {
         // 页数，每页题数若为空，设置默认值
-        if (currentPage == null || currentPage < 1) currentPage = 1;
-        if (limit == null || limit < 1) limit = 10;
+        if (currentPage == null || currentPage < 1)
+            currentPage = 1;
+        if (limit == null || limit < 1)
+            limit = 10;
 
         // 关键词查询不为空
         if (!StringUtils.isEmpty(keyword)) {
@@ -106,11 +110,17 @@ public class ProblemManager {
      * @Description 随机选取一道题目
      * @Since 2020/10/27
      */
-    public RandomProblemVO getRandomProblem() throws StatusFailException {
+    public RandomProblemVO getRandomProblem(String oj) throws StatusFailException {
         QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
+
         // 必须是公开题目
-        queryWrapper.select("problem_id").eq("auth", 1)
-                .eq("is_group", false);
+        if (!Constants.RemoteOJ.isRemoteOJ(oj)) {
+            queryWrapper.select("problem_id").eq("auth", 1).eq("is_remote", false).eq("is_group", false);
+        } else {
+            queryWrapper.select("problem_id").eq("auth", 1).eq("is_remote", true).eq("is_group", false)
+                    .likeRight("problem_id", oj);
+        }
+
         List<Problem> list = problemEntityService.list(queryWrapper);
         if (list.size() == 0) {
             throw new StatusFailException("获取随机题目失败，题库暂无公开题目！");
@@ -120,6 +130,36 @@ public class ProblemManager {
         RandomProblemVO randomProblemVo = new RandomProblemVO();
         randomProblemVo.setProblemId(list.get(index).getProblemId());
         return randomProblemVo;
+    }
+
+    /**
+     * @MethodName getProblemLastId
+     * @Description 获取最新的题目Id
+     * @Since 2020/10/27
+     */
+    public ProblemLastIdVO getProblemLastId() throws StatusFailException {
+        QueryWrapper<Problem> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.select("problem_id")
+                .eq("is_remote", false) // 公共题库
+                .orderByDesc("problem_id");
+        List<Problem> list = problemEntityService.list(queryWrapper);
+
+        // 刷选选纯数字的 problem_id，防止团队题目影响
+        Pattern pattern = Pattern.compile("^\\d+$");
+        List<Problem> filteredList = new ArrayList<>();
+        for (Problem problem : list) {
+            String problemId = problem.getProblemId();
+            // 使用正则匹配方法判断字符串是否为纯数字
+            Matcher matcher = pattern.matcher(problemId);
+            if (matcher.matches()) {
+                filteredList.add(problem);
+            }
+        }
+
+        ProblemLastIdVO problemLastIdVO = new ProblemLastIdVO();
+        problemLastIdVO.setProblemLastId(filteredList.get(0).getProblemId());
+        return problemLastIdVO;
     }
 
     /**
@@ -249,9 +289,10 @@ public class ProblemManager {
      * @Description 获取指定题目的详情信息，标签，所支持语言，做题情况（只能查询公开题目 也就是auth为1）
      * @Since 2020/10/27
      */
-    public ProblemInfoVO getProblemInfo(String problemId, Long gid) throws StatusNotFoundException, StatusForbiddenException {
+    public ProblemInfoVO getProblemInfo(String problemId, Long gid)
+            throws StatusNotFoundException, StatusForbiddenException {
         QueryWrapper<Problem> wrapper = new QueryWrapper<Problem>().eq("problem_id", problemId);
-        //查询题目详情，题目标签，题目语言，题目做题情况
+        // 查询题目详情，题目标签，题目语言，题目做题情况
         Problem problem = problemEntityService.getOne(wrapper, false);
         if (problem == null) {
             throw new StatusNotFoundException("该题号对应的题目不存在");
@@ -295,7 +336,7 @@ public class ProblemManager {
         if (CollectionUtil.isNotEmpty(lidList)) {
             Collection<Language> languages = languageEntityService.listByIds(lidList);
             languages = languages.stream().sorted(Comparator.comparing(Language::getSeq, Comparator.reverseOrder())
-                            .thenComparing(Language::getId))
+                    .thenComparing(Language::getId))
                     .collect(Collectors.toList());
             languages.forEach(language -> {
                 languagesStr.add(language.getName());
@@ -353,9 +394,11 @@ public class ProblemManager {
     private String buildCode(Judge judge) {
         if (judge.getCid() == 0) {
             // 比赛外的提交代码 如果不是超管或题目管理员，需要检查网站是否开启隐藏代码功能
-            boolean isRoot = SecurityUtils.getSubject().hasRole("root"); // 是否为超级管理员
-            boolean isProblemAdmin = SecurityUtils.getSubject().hasRole("problem_admin");// 是否为题目管理员
-            if (!isRoot && !isProblemAdmin) {
+            // 是否为超级管理员或者题目管理或者普通管理
+            boolean isRoot = SecurityUtils.getSubject().hasRole("root")
+                    || SecurityUtils.getSubject().hasRole("problem_admin")
+                    || SecurityUtils.getSubject().hasRole("admin");
+            if (!isRoot) {
                 try {
                     accessValidator.validateAccess(HOJAccessEnum.HIDE_NON_CONTEST_SUBMISSION_CODE);
                 } catch (AccessException e) {

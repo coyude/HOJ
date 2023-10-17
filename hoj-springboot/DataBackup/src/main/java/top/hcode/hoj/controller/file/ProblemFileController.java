@@ -1,6 +1,5 @@
 package top.hcode.hoj.controller.file;
 
-
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import top.hcode.hoj.common.result.CommonResult;
 import top.hcode.hoj.service.file.ProblemFileService;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import org.apache.shiro.authz.annotation.Logical;
 
 /**
  * @Author: Himit_ZH
@@ -24,15 +24,14 @@ public class ProblemFileController {
     @Autowired
     private ProblemFileService problemFileService;
 
-
     /**
      * @param file
      * @MethodName importProblem
-     * @Description zip文件导入题目 仅超级管理员可操作
+     * @Description zip文件导入题目
      * @Return
      * @Since 2021/5/27
      */
-    @RequiresRoles("root")
+    @RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
     @RequiresAuthentication
     @ResponseBody
     @PostMapping("/import-problem")
@@ -40,18 +39,17 @@ public class ProblemFileController {
         return problemFileService.importProblem(file);
     }
 
-
     /**
      * @param pidList
      * @param response
      * @MethodName exportProblem
-     * @Description 导出指定的题目包括测试数据生成zip 仅超级管理员可操作
+     * @Description 导出指定的题目包括测试数据生成zip
      * @Return
      * @Since 2021/5/28
      */
     @GetMapping("/export-problem")
     @RequiresAuthentication
-    @RequiresRoles("root")
+    @RequiresRoles(value = { "root", "problem_admin", "admin" }, logical = Logical.OR)
     public void exportProblem(@RequestParam("pid") List<Long> pidList, HttpServletResponse response) {
         problemFileService.exportProblem(pidList, response);
     }
